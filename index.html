@@ -1,1153 +1,238 @@
-Это масштабный проект. Поскольку я — искусственный интеллект, я не могу создать для вас отдельный репозиторий на GitHub, но я напишу **полный, готовый к использованию код в одном файле (HTML + CSS + JS)**.
-
-Этот код реализует все ваши требования:
-1.  **Дизайн:** Темная тема в стиле Cyberpunk/Neon (как на картинке Netfix).
-2.  **Функционал редактора:** Загрузка картинок, настройка цветов, шрифтов, текстов.
-3.  **Логика игры:** Полиграф (кардиограмма), жизни, таймер, типы вопросов, проверка ответов.
-4.  **Экспорт:** Скачивание HTML, копирование кода (для Genial.ly через iframe/embed), сохранение/загрузка JSON проекта.
-5.  **Локализация:** Переключение языков интерфейса.
-6.  **Предпросмотр:** Живое обновление игры внутри редактора.
-
-### Инструкция по использованию:
-1.  Скопируйте код ниже.
-2.  Создайте на компьютере файл `index.html`.
-3.  Вставьте код и сохраните.
-4.  Откройте файл в браузере.
-
-```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interrogation Editor - Cyberpunk Style</title>
-    <!-- Подключаем шрифты и иконки -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <!-- MathJax для формул -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-    <style>
-        :root {
-            --bg-dark: #050510;
-            --bg-panel: #0f0f1a;
-            --primary: #b026ff; /* Neon Purple */
-            --secondary: #00f3ff; /* Neon Cyan */
-            --accent: #ff0055; /* Neon Red/Pink */
-            --text-main: #ffffff;
-            --text-muted: #8888aa;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: 1px solid rgba(176, 38, 255, 0.3);
-            --font-ui: 'Roboto', sans-serif;
-            --font-header: 'Orbitron', sans-serif;
-        }
-
-        * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--primary) var(--bg-dark); }
-        body { margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-ui); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-
-        /* --- LAYOUT --- */
-        .app-container { display: flex; height: 100%; width: 100%; }
-        
-        /* Sidebar (Editor Controls) */
-        .sidebar { width: 400px; background: var(--bg-panel); border-right: var(--border); display: flex; flex-direction: column; overflow-y: auto; z-index: 10; }
-        .sidebar-header { padding: 20px; background: linear-gradient(90deg, var(--bg-panel), transparent); border-bottom: var(--border); position: sticky; top: 0; z-index: 2; backdrop-filter: blur(10px); }
-        .sidebar-content { padding: 20px; flex: 1; }
-        
-        /* Main Preview Area */
-        .preview-area { flex: 1; position: relative; background: #000; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        
-        /* --- UI COMPONENTS --- */
-        h1, h2, h3 { font-family: var(--font-header); text-transform: uppercase; letter-spacing: 1px; margin: 0 0 15px 0; color: var(--secondary); text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
-        h1 { font-size: 1.2rem; }
-        
-        .control-group { margin-bottom: 20px; background: var(--glass); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-        .control-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
-        
-        input[type="text"], input[type="number"], select, textarea { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--primary); color: white; padding: 8px; border-radius: 4px; font-family: var(--font-ui); margin-bottom: 10px; }
-        input[type="color"] { width: 100%; height: 40px; border: none; background: none; cursor: pointer; }
-        input[type="file"] { display: none; }
-        
-        .btn { background: linear-gradient(45deg, var(--primary), #6a0dad); border: none; color: white; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-family: var(--font-header); font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; margin-bottom: 10px; box-shadow: 0 0 15px rgba(176, 38, 255, 0.4); }
-        .btn:hover { box-shadow: 0 0 25px rgba(176, 38, 255, 0.8); transform: translateY(-2px); }
-        .btn-secondary { background: linear-gradient(45deg, #333, #555); box-shadow: none; }
-        .btn-success { background: linear-gradient(45deg, #00b09b, #96c93d); }
-        .btn-danger { background: linear-gradient(45deg, #ff0055, #ff5e62); }
-        .btn-small { padding: 5px 10px; font-size: 0.7rem; width: auto; display: inline-block; margin-right: 5px; }
-
-        .toggle-switch { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .toggle-switch input { width: auto; margin: 0; }
-
-        /* --- GAME PREVIEW STYLES (INSIDE IFRAME/DIV) --- */
-        #game-stage { width: 100%; height: 100%; position: relative; background-size: cover; background-position: center; display: flex; flex-direction: column; transition: all 0.3s; }
-        
-        /* Title Screen */
-        .screen-title { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
-        .game-title-text { font-size: 3rem; color: var(--secondary); text-shadow: 0 0 20px var(--secondary); margin-bottom: 20px; text-align: center; }
-        
-        /* Game HUD */
-        .hud-top { display: flex; justify-content: space-between; padding: 20px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 10; }
-        .lives-container { color: var(--accent); font-size: 1.5rem; }
-        .timer-container { font-family: var(--font-header); font-size: 1.5rem; color: var(--secondary); }
-        
-        /* Character Area */
-        .character-area { flex: 1; display: flex; justify-content: center; align-items: flex-end; position: relative; padding-bottom: 20px; }
-        .character-sprite { max-height: 60%; max-width: 80%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.8)); transition: transform 0.2s; }
-        .character-speaking { animation: pulse 0.5s infinite alternate; }
-        
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.02); filter: drop-shadow(0 0 15px var(--primary)); } }
-
-        /* Polygraph / Interrogation Panel */
-        .interrogation-panel { height: 35%; background: rgba(10, 10, 20, 0.9); border-top: 2px solid var(--primary); padding: 20px; display: flex; flex-direction: column; position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
-        
-        .polygraph-display { height: 60px; width: 100%; background: #000; border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 4px; }
-        canvas#ecg-canvas { width: 100%; height: 100%; }
-        .stress-light { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; background: #333; box-shadow: 0 0 10px #000; transition: 0.3s; }
-        .stress-light.red { background: var(--accent); box-shadow: 0 0 20px var(--accent); }
-        .stress-light.green { background: #0f0; box-shadow: 0 0 20px #0f0; }
-
-        .question-box { font-size: 1.2rem; margin-bottom: 15px; min-height: 50px; color: #fff; text-align: center; }
-        
-        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .answer-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--primary); color: white; padding: 10px; cursor: pointer; transition: 0.2s; border-radius: 4px; text-align: left; }
-        .answer-btn:hover { background: var(--primary); }
-        .answer-btn.correct { background: #00b09b !important; border-color: #00b09b; }
-        .answer-btn.wrong { background: var(--accent) !important; border-color: var(--accent); animation: shake 0.5s; }
-        
-        .input-answer { width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--secondary); color: white; font-size: 1rem; }
-
-        /* Feedback Modal */
-        .feedback-modal { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 40px; }
-        .feedback-text { font-size: 1.5rem; margin-bottom: 20px; color: var(--secondary); }
-        
-        /* Footer */
-        .editor-footer { padding: 10px; background: #000; text-align: center; font-size: 0.7rem; color: #555; border-top: 1px solid #333; }
-
-        /* Animations */
-        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
-
-        /* Tabs */
-        .tabs { display: flex; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 10px; text-align: center; background: #222; cursor: pointer; border-bottom: 2px solid transparent; }
-        .tab.active { background: var(--glass); border-bottom: 2px solid var(--secondary); color: var(--secondary); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* Question List Item */
-        .q-item { background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 10px; border-left: 3px solid var(--primary); position: relative; }
-        .q-item-controls { display: flex; gap: 5px; margin-top: 5px; }
-        .remove-q { color: var(--accent); cursor: pointer; float: right; }
-
-    </style>
-</head>
-<body>
-
-<div class="app-container">
-    <!-- SIDEBAR: EDITOR -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h1><i class="fas fa-microchip"></i> Interrogation Editor</h1>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">v1.0 | Cyberpunk Edition</div>
-        </div>
-        
-        <div class="sidebar-content">
-            <!-- TABS -->
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('settings')">Настройки</div>
-                <div class="tab" onclick="switchTab('questions')">Вопросы</div>
-                <div class="tab" onclick="switchTab('export')">Экспорт</div>
-            </div>
-
-            <!-- TAB: SETTINGS -->
-            <div id="tab-settings" class="tab-content active">
-                <div class="control-group">
-                    <label>Язык интерфейса (Interface Language)</label>
-                    <select id="lang-select" onchange="updateLanguage()">
-                        <option value="ru">Русский</option>
-                        <option value="en">English</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                    </select>
-                </div>
-
-                <div class="control-group">
-                    <label>Название игры</label>
-                    <input type="text" id="game-title-input" value="ДОПРОС ИСТИНЫ" oninput="updatePreview()">
-                    <div class="toggle-switch">
-                        <span>Титульный экран</span>
-                        <input type="checkbox" id="show-title-screen" checked onchange="updatePreview()">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label>Фон допросной (Image)</label>
-                    <button class="btn btn-secondary btn-small" onclick="document.getElementById('bg-upload').click()">Загрузить фон</button>
-                    <input type="file" id="bg-upload" accept="image/*" onchange="handleImageUpload(this, 'bg')">
-                    <div id="bg-preview" style="height: 50px; background-size: cover; margin-top: 5px; border: 1px dashed #555;"></div>
-                </div>
-
-                <div class="control-group">
-                    <label>Подозреваемый (Sprite)</label>
-                    <button class="btn btn-secondary btn-small" onclick="document.getElementById('char-upload').click()">Загрузить персонажа</button>
-                    <input type="file" id="char-upload" accept="image/*" onchange="handleImageUpload(this, 'char')">
-                </div>
-
-                <div class="control-group">
-                    <label>Цветовая схема</label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div><small>Основной</small><input type="color" id="col-primary" value="#b026ff" oninput="updateColors()"></div>
-                        <div><small>Акцент</small><input type="color" id="col-accent" value="#00f3ff" oninput="updateColors()"></div>
-                        <div><small>Кнопки</small><input type="color" id="col-btn" value="#b026ff" oninput="updateColors()"></div>
-                        <div><small>Текст</small><input type="color" id="col-text" value="#ffffff" oninput="updateColors()"></div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label>Шрифт</label>
-                    <select id="font-select" onchange="updateFonts()">
-                        <option value="'Roboto', sans-serif">Standard (Roboto)</option>
-                        <option value="'Orbitron', sans-serif">Cyber (Orbitron)</option>
-                        <option value="'Courier New', monospace">Terminal</option>
-                        <option value="Arial, sans-serif">Arial</option>
-                    </select>
-                </div>
-
-                <div class="control-group">
-                    <label>Игровые настройки</label>
-                    <div class="toggle-switch">
-                        <span>Количество жизней</span>
-                        <input type="number" id="lives-count" value="3" min="1" max="10" style="width: 60px;" oninput="updatePreview()">
-                    </div>
-                    <div class="toggle-switch">
-                        <span>Таймер (сек/вопрос, 0=off)</span>
-                        <input type="number" id="timer-limit" value="0" min="0" style="width: 60px;" oninput="updatePreview()">
-                    </div>
-                    <div class="toggle-switch">
-                        <span>Интервал появления (мс)</span>
-                        <input type="number" id="spawn-interval" value="1000" step="100" style="width: 80px;">
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: QUESTIONS -->
-            <div id="tab-questions" class="tab-content">
-                <div class="control-group">
-                    <button class="btn btn-success" onclick="addQuestion()"><i class="fas fa-plus"></i> Добавить вопрос</button>
-                    <p style="font-size: 0.8rem; color: #aaa;">Поддерживается LaTeX: \( E=mc^2 \)</p>
-                </div>
-                <div id="questions-list">
-                    <!-- Questions will be injected here -->
-                </div>
-            </div>
-
-            <!-- TAB: EXPORT -->
-            <div id="tab-export" class="tab-content">
-                <div class="control-group">
-                    <h3>Сохранение и Загрузка</h3>
-                    <button class="btn" onclick="saveProject()"><i class="fas fa-save"></i> Скачать проект (.json)</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('proj-upload').click()"><i class="fas fa-folder-open"></i> Загрузить проект</button>
-                    <input type="file" id="proj-upload" accept=".json" onchange="loadProject(this)">
-                </div>
-
-                <div class="control-group">
-                    <h3>Публикация</h3>
-                    <button class="btn btn-success" onclick="downloadHTML()"><i class="fas fa-file-code"></i> Скачать HTML игру</button>
-                    <button class="btn" onclick="copyGeniallyCode()"><i class="fas fa-copy"></i> Код для Genially (Embed)</button>
-                </div>
-                
-                <div class="control-group">
-                    <label>Инструкция для Genially:</label>
-                    <p style="font-size: 0.8rem; color: #ccc;">1. Скачайте HTML файл.<br>2. Загрузите его на хостинг (GitHub Pages, Netlify).<br>3. Вставьте ссылку в Genially через элемент "Web Page" или используйте кнопку "Код для Genially" для вставки iframe кода (требуется публичная ссылка).</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="editor-footer">
-            Автор: Гальмиз Мария Александровна<br>
-            &copy; 2026 Interrogation Engine
-        </div>
-    </div>
-
-    <!-- PREVIEW AREA -->
-    <div class="preview-area" id="preview-container">
-        <!-- GAME STAGE -->
-        <div id="game-stage">
-            <!-- Title Screen -->
-            <div class="screen-title" id="preview-title-screen">
-                <div class="game-title-text" id="preview-title-text">ДОПРОС ИСТИНЫ</div>
-                <button class="btn" style="width: 200px;" onclick="startGamePreview()" id="btn-start-preview">START INVESTIGATION</button>
-            </div>
-
-            <!-- HUD -->
-            <div class="hud-top">
-                <div class="lives-container" id="preview-lives">
-                    <i class="fas fa-heart"></i><i class="fas fa-heart"></i><i class="fas fa-heart"></i>
-                </div>
-                <div class="timer-container" id="preview-timer">00:00</div>
-            </div>
-
-            <!-- Character -->
-            <div class="character-area">
-                <img src="https://via.placeholder.com/300x500/333/fff?text=Suspect" id="preview-char" class="character-sprite">
-            </div>
-
-            <!-- Interrogation Panel -->
-            <div class="interrogation-panel">
-                <div class="polygraph-display">
-                    <canvas id="ecg-canvas"></canvas>
-                    <div class="stress-light" id="stress-light"></div>
-                </div>
-                
-                <div class="question-box" id="preview-question">
-                    Нажмите "Start", чтобы начать допрос...
-                </div>
-
-                <div class="answers-grid" id="preview-answers">
-                    <!-- Buttons generated dynamically -->
-                </div>
-                
-                <!-- Input for text answers (hidden by default) -->
-                <div id="input-container" style="display:none; width: 100%;">
-                    <input type="text" class="input-answer" id="preview-input" placeholder="Введите ответ...">
-                    <button class="btn btn-small" style="margin-top: 5px;" onclick="checkInputAnswer()">OK</button>
-                </div>
-            </div>
-
-            <!-- Feedback Modal -->
-            <div class="feedback-modal" id="feedback-modal">
-                <h2 id="feedback-title" style="color: var(--accent);">ЛИЖЬ ОБНАРУЖЕНА</h2>
-                <div class="feedback-text" id="feedback-text">Объяснение ошибки...</div>
-                <button class="btn" onclick="closeFeedback()">Продолжить допрос</button>
-            </div>
-            
-            <!-- Game Over Modal -->
-            <div class="feedback-modal" id="gameover-modal">
-                <h2 style="color: var(--accent);">ДЕЛО ЗАКРЫТО</h2>
-                <div class="feedback-text" id="gameover-text">Вы проиграли.</div>
-                <button class="btn" onclick="resetGamePreview()">Начать заново</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- JAVASCRIPT LOGIC -->
-<script>
-    // --- STATE MANAGEMENT ---
-    const state = {
-        title: "ДОПРОС ИСТИНЫ",
-        showTitle: true,
-        bgImage: "",
-        charImage: "https://via.placeholder.com/300x500/333/fff?text=Suspect",
-        colors: { primary: "#b026ff", accent: "#00f3ff", btn: "#b026ff", text: "#ffffff" },
-        font: "'Roboto', sans-serif",
-        lives: 3,
-        timer: 0,
-        spawnInterval: 1000,
-        questions: [
-            {
-                id: 1,
-                type: "single", // single, multiple, input, oral
-                text: "Я перенес столицу в Санкт-Петербург.",
-                options: ["Правда", "Ложь"],
-                correct: [0], // Index of correct answer
-                explanation: "Это правда. Петр I основал Санкт-Петербург в 1703 году и перенес туда столицу."
-            },
-            {
-                id: 2,
-                type: "single",
-                text: "Я лично построил первый русский пароход.",
-                options: ["Правда", "Ложь"],
-                correct: [1],
-                explanation: "Ложь. Первый пароход был построен гораздо позже, при Александре I (Елизаров и Черепановы - паровоз, пароход - Берд)."
-            }
-        ],
-        lang: "ru"
-    };
-
-    // --- TRANSLATIONS ---
-    const i18n = {
-        ru: { start: "НАЧАТЬ ДОПРОС", truth: "ПРАВДА", lie: "ЛОЖЬ", win: "ДОПРОС ОКОНЧЕН", lose: "ВЫ УВОЛЕНЫ", next: "ДАЛЬШЕ", timer: "ВРЕМЯ" },
-        en: { start: "START INTERROGATION", truth: "TRUTH", lie: "LIE", win: "INTERROGATION OVER", lose: "YOU ARE FIRED", next: "NEXT", timer: "TIME" },
-        es: { start: "COMENZAR", truth: "VERDAD", lie: "MENTIRA", win: "FIN", lose: "DESPEDIDO", next: "SIGUIENTE", timer: "TIEMPO" },
-        fr: { start: "COMMENCER", truth: "VÉRITÉ", lie: "MENSONGE", win: "FINI", lose: "LICENCIÉ", next: "SUIVANT", timer: "TEMPS" }
-    };
-
-    // --- INITIALIZATION ---
-    window.onload = function() {
-        renderQuestionsList();
-        updatePreview();
-        initPolygraph();
-    };
-
-    // --- EDITOR FUNCTIONS ---
-
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
-        event.target.classList.add('active');
-        document.getElementById(`tab-${tabName}`).classList.add('active');
-    }
-
-    function updateLanguage() {
-        state.lang = document.getElementById('lang-select').value;
-        document.getElementById('btn-start-preview').innerText = i18n[state.lang].start;
-        // In a real app, we would update all labels here
-    }
-
-    function handleImageUpload(input, type) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if (type === 'bg') {
-                    state.bgImage = e.target.result;
-                    document.getElementById('bg-preview').style.backgroundImage = `url(${e.target.result})`;
-                } else {
-                    state.charImage = e.target.result;
-                }
-                updatePreview();
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function updateColors() {
-        state.colors.primary = document.getElementById('col-primary').value;
-        state.colors.accent = document.getElementById('col-accent').value;
-        state.colors.btn = document.getElementById('col-btn').value;
-        state.colors.text = document.getElementById('col-text').value;
-        
-        const root = document.documentElement;
-        root.style.setProperty('--primary', state.colors.primary);
-        root.style.setProperty('--secondary', state.colors.accent);
-        root.style.setProperty('--text-main', state.colors.text);
-        
-        // Update button gradients dynamically
-        const btns = document.querySelectorAll('.btn');
-        btns.forEach(b => {
-            if(!b.classList.contains('btn-secondary') && !b.classList.contains('btn-success') && !b.classList.contains('btn-danger')) {
-                b.style.background = `linear-gradient(45deg, ${state.colors.btn}, #000)`;
-            }
-        });
-    }
-
-    function updateFonts() {
-        state.font = document.getElementById('font-select').value;
-        document.getElementById('game-stage').style.fontFamily = state.font;
-    }
-
-    function updatePreview() {
-        state.title = document.getElementById('game-title-input').value;
-        state.showTitle = document.getElementById('show-title-screen').checked;
-        state.lives = parseInt(document.getElementById('lives-count').value);
-        state.timer = parseInt(document.getElementById('timer-limit').value);
-        state.spawnInterval = parseInt(document.getElementById('spawn-interval').value);
-
-        // Apply to DOM
-        document.getElementById('preview-title-text').innerText = state.title;
-        document.getElementById('preview-title-screen').style.display = state.showTitle ? 'flex' : 'none';
-        
-        const stage = document.getElementById('game-stage');
-        if (state.bgImage) stage.style.backgroundImage = `url(${state.bgImage})`;
-        
-        document.getElementById('preview-char').src = state.charImage;
-        
-        // Render Lives
-        let hearts = "";
-        for(let i=0; i<state.lives; i++) hearts += '<i class="fas fa-heart"></i>';
-        document.getElementById('preview-lives').innerHTML = hearts;
-    }
-
-    // --- QUESTION EDITOR LOGIC ---
-
-    function renderQuestionsList() {
-        const list = document.getElementById('questions-list');
-        list.innerHTML = "";
-        state.questions.forEach((q, index) => {
-            const div = document.createElement('div');
-            div.className = 'q-item';
-            div.innerHTML = `
-                <span class="remove-q" onclick="removeQuestion(${index})"><i class="fas fa-trash"></i></span>
-                <strong>Q${index+1}:</strong> ${q.text.substring(0, 30)}... <br>
-                <small>Type: ${q.type}</small>
-                <div class="q-item-controls">
-                    <button class="btn btn-small btn-secondary" onclick="editQuestion(${index})">Edit</button>
-                </div>
-            `;
-            list.appendChild(div);
-        });
-    }
-
-    function addQuestion() {
-        const newQ = {
-            id: Date.now(),
-            type: "single",
-            text: "Новый вопрос...",
-            options: ["Ответ 1", "Ответ 2"],
-            correct: [0],
-            explanation: "Объяснение..."
-        };
-        state.questions.push(newQ);
-        renderQuestionsList();
-        editQuestion(state.questions.length - 1);
-    }
-
-    function removeQuestion(index) {
-        state.questions.splice(index, 1);
-        renderQuestionsList();
-    }
-
-    function editQuestion(index) {
-        const q = state.questions[index];
-        const modalContent = `
-            <div style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; display:flex; justify-content:center; align-items:center;">
-                <div style="background:var(--bg-panel); padding:20px; width:500px; border:1px solid var(--primary); max-height:90vh; overflow-y:auto;">
-                    <h3>Редактор вопроса</h3>
-                    <label>Текст вопроса (поддерживает LaTeX)</label>
-                    <textarea id="edit-q-text" rows="3">${q.text}</textarea>
-                    
-                    <label>Тип</label>
-                    <select id="edit-q-type" onchange="toggleOptionsEditor()">
-                        <option value="single" ${q.type==='single'?'selected':''}>Один ответ (True/False)</option>
-                        <option value="multiple" ${q.type==='multiple'?'selected':''}>Множественный выбор</option>
-                        <option value="input" ${q.type==='input'?'selected':''}>Ввод текста</option>
-                        <option value="oral" ${q.type==='oral'?'selected':''}>Устный ответ (только кнопка)</option>
-                    </select>
-
-                    <div id="options-editor">
-                        <label>Варианты ответов (каждый с новой строки)</label>
-                        <textarea id="edit-q-options" rows="4">${q.options.join('\n')}</textarea>
-                        <label>Правильные (номера через запятую, 0-based)</label>
-                        <input type="text" id="edit-q-correct" value="${q.correct.join(',')}">
-                    </div>
-
-                    <div id="input-editor" style="display:none;">
-                        <label>Правильный текст (ключевые слова через |)</label>
-                        <input type="text" id="edit-q-input-ans" value="${q.options[0] || ''}">
-                    </div>
-
-                    <label>Объяснение (если ошибка)</label>
-                    <textarea id="edit-q-exp" rows="3">${q.explanation}</textarea>
-
-                    <button class="btn btn-success" onclick="saveQuestionEdit(${index})">Сохранить</button>
-                    <button class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">Отмена</button>
-                </div>
-            </div>
-        `;
-        
-        // Remove existing modal if any
-        const existing = document.querySelector('.temp-modal');
-        if(existing) existing.remove();
-
-        const div = document.createElement('div');
-        div.className = 'temp-modal';
-        div.innerHTML = modalContent;
-        document.body.appendChild(div);
-        
-        toggleOptionsEditor(); // Init visibility
-    }
-
-    function toggleOptionsEditor() {
-        const type = document.getElementById('edit-q-type').value;
-        const optEd = document.getElementById('options-editor');
-        const inpEd = document.getElementById('input-editor');
-        
-        if(type === 'input') {
-            optEd.style.display = 'none';
-            inpEd.style.display = 'block';
-        } else if (type === 'oral') {
-            optEd.style.display = 'none';
-            inpEd.style.display = 'none';
-        } else {
-            optEd.style.display = 'block';
-            inpEd.style.display = 'none';
-        }
-    }
-
-    function saveQuestionEdit(index) {
-        const q = state.questions[index];
-        q.text = document.getElementById('edit-q-text').value;
-        q.type = document.getElementById('edit-q-type').value;
-        q.explanation = document.getElementById('edit-q-exp').value;
-
-        if(q.type === 'input') {
-            q.options = [document.getElementById('edit-q-input-ans').value];
-            q.correct = [0];
-        } else if (q.type !== 'oral') {
-            q.options = document.getElementById('edit-q-options').value.split('\n');
-            q.correct = document.getElementById('edit-q-correct').value.split(',').map(Number);
-        } else {
-            q.options = ["Показать ответ"];
-            q.correct = [0];
-        }
-
-        document.querySelector('.temp-modal').remove();
-        renderQuestionsList();
-    }
-
-    // --- GAME ENGINE (PREVIEW) ---
-
-    let gameActive = false;
-    let currentQIndex = 0;
-    let currentLives = 0;
-    let timerInterval = null;
-    let timeLeft = 0;
-    let ecgCtx, ecgCanvas, ecgX = 0, ecgSpeed = 2, ecgAmp = 10, ecgBase = 30;
-    let isLying = false;
-
-    function initPolygraph() {
-        ecgCanvas = document.getElementById('ecg-canvas');
-        ecgCtx = ecgCanvas.getContext('2d');
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        animateECG();
-    }
-
-    function resizeCanvas() {
-        ecgCanvas.width = ecgCanvas.parentElement.offsetWidth;
-        ecgCanvas.height = ecgCanvas.parentElement.offsetHeight;
-        ecgBase = ecgCanvas.height / 2;
-    }
-
-    function animateECG() {
-        if (!gameActive) {
-            requestAnimationFrame(animateECG);
-            return;
-        }
-
-        ecgCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Trail effect
-        ecgCtx.fillRect(0, 0, ecgCanvas.width, ecgCanvas.height);
-        
-        ecgCtx.beginPath();
-        ecgCtx.strokeStyle = isLying ? '#ff0055' : '#00f3ff';
-        ecgCtx.lineWidth = 2;
-        
-        // Generate noise based on lie state
-        const noise = isLying ? (Math.random() * 40 - 20) : (Math.random() * 10 - 5);
-        const spike = isLying ? (Math.random() > 0.8 ? 50 : 0) : 0;
-        
-        const y = ecgBase + noise + spike;
-        
-        if (ecgX === 0) ecgCtx.moveTo(0, y);
-        else ecgCtx.lineTo(ecgX, y);
-        
-        ecgCtx.stroke();
-        
-        ecgX += ecgSpeed;
-        if (ecgX > ecgCanvas.width) {
-            ecgX = 0;
-            ecgCtx.clearRect(0,0, ecgCanvas.width, ecgCanvas.height);
-        }
-        
-        // Update Light
-        const light = document.getElementById('stress-light');
-        if(isLying) {
-            light.className = 'stress-light red';
-        } else {
-            light.className = 'stress-light green';
-        }
-
-        requestAnimationFrame(animateECG);
-    }
-
-    function startGamePreview() {
-        if(state.questions.length === 0) {
-            alert("Добавьте вопросы!");
-            return;
-        }
-        gameActive = true;
-        currentLives = state.lives;
-        currentQIndex = 0;
-        
-        document.getElementById('preview-title-screen').style.display = 'none';
-        document.getElementById('gameover-modal').style.display = 'none';
-        updateLivesDisplay();
-        
-        loadQuestion();
-    }
-
-    function resetGamePreview() {
-        document.getElementById('gameover-modal').style.display = 'none';
-        document.getElementById('preview-title-screen').style.display = state.showTitle ? 'flex' : 'none';
-        gameActive = false;
-        document.getElementById('preview-question').innerText = "Нажмите Start...";
-        document.getElementById('preview-answers').innerHTML = "";
-        clearInterval(timerInterval);
-    }
-
-    function updateLivesDisplay() {
-        let h = "";
-        for(let i=0; i<currentLives; i++) h += '<i class="fas fa-heart"></i>';
-        document.getElementById('preview-lives').innerHTML = h;
-    }
-
-    function loadQuestion() {
-        if(currentQIndex >= state.questions.length) {
-            endGame(true);
-            return;
-        }
-
-        const q = state.questions[currentQIndex];
-        const qBox = document.getElementById('preview-question');
-        const ansBox = document.getElementById('preview-answers');
-        const inputCont = document.getElementById('input-container');
-        
-        // Render Text with MathJax
-        qBox.innerHTML = q.text;
-        if(window.MathJax) MathJax.typesetPromise([qBox]);
-
-        // Determine if this question implies a lie (for polygraph effect)
-        // Logic: If the correct answer is "Lie" (index 1 in standard T/F) or if it's a trick question.
-        // For simplicity in this demo: if correct answer includes index 1 (False/Lie), set isLying true.
-        // Or better: The polygraph reacts to the *content*. Let's assume specific questions trigger it.
-        // Here we simulate: if the correct answer is the second option (often "False"), the machine goes crazy.
-        isLying = q.correct.includes(1) || q.type === 'input'; 
-
-        // Setup Answers
-        ansBox.innerHTML = "";
-        inputCont.style.display = "none";
-        ansBox.style.display = "grid";
-
-        if(q.type === 'input') {
-            ansBox.style.display = "none";
-            inputCont.style.display = "block";
-            document.getElementById('preview-input').value = "";
-        } else if (q.type === 'oral') {
-            ansBox.innerHTML = `<button class="answer-btn" onclick="handleOral()">Я готов ответить устно</button>`;
-        } else {
-            q.options.forEach((opt, idx) => {
-                const btn = document.createElement('div');
-                btn.className = 'answer-btn';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(idx, btn);
-                ansBox.appendChild(btn);
-            });
-        }
-
-        // Timer
-        clearInterval(timerInterval);
-        if(state.timer > 0) {
-            timeLeft = state.timer;
-            document.getElementById('preview-timer').innerText = timeLeft;
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('preview-timer').innerText = timeLeft;
-                if(timeLeft <= 0) {
-                    handleWrong("Время вышло!");
-                }
-            }, 1000);
-        } else {
-            document.getElementById('preview-timer').innerText = "--";
-        }
-        
-        // Character Animation
-        const char = document.getElementById('preview-char');
-        char.classList.add('character-speaking');
-        setTimeout(() => char.classList.remove('character-speaking'), 2000);
-    }
-
-    function checkAnswer(selectedIndex, btnElement) {
-        const q = state.questions[currentQIndex];
-        const isCorrect = q.correct.includes(selectedIndex);
-
-        if(isCorrect) {
-            btnElement.classList.add('correct');
-            isLying = false; // Calm down
-            setTimeout(() => {
-                currentQIndex++;
-                loadQuestion();
-            }, state.spawnInterval);
-        } else {
-            btnElement.classList.add('wrong');
-            handleWrong(q.explanation);
-        }
-    }
-
-    function checkInputAnswer() {
-        const val = document.getElementById('preview-input').value.toLowerCase().trim();
-        const q = state.questions[currentQIndex];
-        const validAnswers = q.options[0].toLowerCase().split('|').map(s => s.trim());
-        
-        if(validAnswers.includes(val)) {
-            isLying = false;
-            setTimeout(() => {
-                currentQIndex++;
-                loadQuestion();
-            }, state.spawnInterval);
-        } else {
-            handleWrong(q.explanation);
-        }
-    }
-
-    function handleOral() {
-        // For oral, we just show the explanation/answer and move on
-        const q = state.questions[currentQIndex];
-        showFeedback("Правильный ответ:", q.options.join(', '), true);
-    }
-
-    function handleWrong(explanation) {
-        clearInterval(timerInterval);
-        currentLives--;
-        updateLivesDisplay();
-        isLying = true; // Max stress
-        
-        if(currentLives <= 0) {
-            endGame(false);
-        } else {
-            showFeedback("ОШИБКА / ЛОЖЬ", explanation, false);
-        }
-    }
-
-    function showFeedback(title, text, isWinMove) {
-        const modal = document.getElementById('feedback-modal');
-        document.getElementById('feedback-title').innerText = title;
-        document.getElementById('feedback-text').innerText = text;
-        modal.style.display = 'flex';
-        
-        // If it was a correct oral answer, we need to advance index after closing
-        if(isWinMove) {
-            modal.dataset.advance = "true";
-        } else {
-            modal.dataset.advance = "false";
-        }
-    }
-
-    function closeFeedback() {
-        document.getElementById('feedback-modal').style.display = 'none';
-        const modal = document.getElementById('feedback-modal');
-        if(modal.dataset.advance === "true") {
-            currentQIndex++;
-            loadQuestion();
-        } else {
-            // Reload same question or next? Usually next in trivia, but here maybe retry?
-            // Let's go next to keep flow
-            currentQIndex++;
-            loadQuestion();
-        }
-    }
-
-    function endGame(win) {
-        gameActive = false;
-        clearInterval(timerInterval);
-        const modal = document.getElementById('gameover-modal');
-        const txt = document.getElementById('gameover-text');
-        modal.style.display = 'flex';
-        txt.innerText = win ? "Вы раскрыли все ложь! Дело закрыто." : "Подозреваемый обманул вас. Вы уволены.";
-    }
-
-    // --- EXPORT / IMPORT FUNCTIONS ---
-
-    function getProjectData() {
-        return JSON.stringify(state);
-    }
-
-    function saveProject() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(getProjectData());
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "interrogation_project.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-    }
-
-    function loadProject(input) {
-        const file = input.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const loadedState = JSON.parse(e.target.result);
-                Object.assign(state, loadedState);
-                
-                // Update UI inputs
-                document.getElementById('game-title-input').value = state.title;
-                document.getElementById('show-title-screen').checked = state.showTitle;
-                document.getElementById('lives-count').value = state.lives;
-                document.getElementById('timer-limit').value = state.timer;
-                document.getElementById('col-primary').value = state.colors.primary;
-                // ... update others ...
-                
-                updateColors();
-                updatePreview();
-                renderQuestionsList();
-                alert("Проект загружен!");
-            } catch(err) {
-                alert("Ошибка файла");
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    function downloadHTML() {
-        // This generates a standalone HTML file containing the current state
-        const htmlContent = generateStandaloneHTML(state);
-        const blob = new Blob([htmlContent], {type: "text/html"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "interrogation_game.html";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-
-    function copyGeniallyCode() {
-        // Since we can't host the file for them, we provide the code to embed an iframe
-        // But Genially needs a URL. So we instruct them to upload the HTML first.
-        // OR we provide a Base64 encoded version (too long).
-        // Best approach for "Copy Code": Provide the iframe snippet assuming they host it.
-        
-        alert("Сначала скачайте HTML файл (кнопка выше), загрузите его на любой хостинг (например, GitHub Pages), а затем вставьте ссылку в Genially.");
-        
-        // Alternatively, copy the raw HTML to clipboard (might be too big)
-        const htmlContent = generateStandaloneHTML(state);
-        navigator.clipboard.writeText(htmlContent).then(() => {
-            alert("HTML код скопирован! Вы можете вставить его в виджет 'HTML' в Genially (но лучше загрузить как файл).");
-        });
-    }
-
-    // --- GENERATE STANDALONE HTML ---
-    function generateStandaloneHTML(data) {
-        // This is a template string that recreates the game logic in a single file without the editor
-        return `
-<!DOCTYPE html>
-<html lang="${data.lang}">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${data.title}</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"><\/script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Interrogation Studio</title>
 <style>
-    body { margin: 0; background: #000; color: ${data.colors.text}; font-family: ${data.font}; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; }
-    #game-stage { width: 100%; height: 100%; position: relative; background-image: url('${data.bgImage}'); background-size: cover; background-position: center; display: flex; flex-direction: column; }
-    .screen-title { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
-    .game-title-text { font-size: 3rem; color: ${data.colors.accent}; text-shadow: 0 0 20px ${data.colors.accent}; margin-bottom: 20px; text-align: center; font-family: 'Orbitron'; }
-    .btn { background: linear-gradient(45deg, ${data.colors.btn}, #000); border: 1px solid ${data.colors.primary}; color: white; padding: 15px 40px; border-radius: 4px; cursor: pointer; font-family: 'Orbitron'; font-weight: bold; text-transform: uppercase; transition: 0.3s; box-shadow: 0 0 15px ${data.colors.primary}; font-size: 1.2rem; }
-    .btn:hover { box-shadow: 0 0 30px ${data.colors.primary}; transform: scale(1.05); }
-    .hud-top { display: flex; justify-content: space-between; padding: 20px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 10; }
-    .lives-container { color: #ff0055; font-size: 1.5rem; }
-    .timer-container { font-family: 'Orbitron'; font-size: 1.5rem; color: ${data.colors.accent}; }
-    .character-area { flex: 1; display: flex; justify-content: center; align-items: flex-end; position: relative; padding-bottom: 20px; }
-    .character-sprite { max-height: 60%; max-width: 80%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.8)); }
-    .interrogation-panel { height: 35%; background: rgba(10, 10, 20, 0.95); border-top: 2px solid ${data.colors.primary}; padding: 20px; display: flex; flex-direction: column; position: relative; }
-    .polygraph-display { height: 60px; width: 100%; background: #000; border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; }
-    canvas { width: 100%; height: 100%; }
-    .stress-light { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; background: #333; }
-    .stress-light.red { background: #ff0055; box-shadow: 0 0 20px #ff0055; }
-    .stress-light.green { background: #0f0; box-shadow: 0 0 20px #0f0; }
-    .question-box { font-size: 1.3rem; margin-bottom: 15px; min-height: 50px; text-align: center; }
-    .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .answer-btn { background: rgba(255,255,255,0.1); border: 1px solid ${data.colors.primary}; color: white; padding: 15px; cursor: pointer; transition: 0.2s; border-radius: 4px; font-size: 1rem; }
-    .answer-btn:hover { background: ${data.colors.primary}; }
-    .answer-btn.correct { background: #00b09b !important; }
-    .answer-btn.wrong { background: #ff0055 !important; }
-    .input-answer { width: 100%; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid ${data.colors.accent}; color: white; font-size: 1.2rem; }
-    .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 40px; }
-    .modal h2 { color: ${data.colors.accent}; font-family: 'Orbitron'; }
-    .author-footer { position: absolute; bottom: 5px; width: 100%; text-align: center; font-size: 0.7rem; color: #555; z-index: 5; }
-    @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.02); filter: drop-shadow(0 0 15px ${data.colors.primary}); } }
-    .speaking { animation: pulse 0.5s infinite alternate; }
+:root{--bg:#050712;--panel:#0c1024;--panel2:#111632;--line:#262b55;--text:#f6f5ff;--muted:#a9add0;--purple:#9b4dff;--pink:#ff3fe8;--blue:#4a8dff;--green:#31e6a2;--red:#ff4d78;--yellow:#ffd95a;--radius:18px;--font:Inter,Arial,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 10%,#17104b 0,#080a17 32%,#03040b 75%);color:var(--text);font-family:var(--font);min-height:100vh}
+.app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
+.topbar{height:72px;display:flex;align-items:center;gap:20px;padding:0 24px;border-bottom:1px solid #1c2040;background:rgba(4,6,18,.86);backdrop-filter:blur(18px);position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;min-width:220px}.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#8c32ff,#3d8dff);box-shadow:0 0 25px #8d36ff66;display:grid;place-items:center}.logo:after{content:"◆";font-size:17px;color:white}
+.top-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#0d1128;color:#f8f7ff;border-radius:10px;padding:10px 14px}.btn:hover{border-color:#6f58c9;transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,#9c42ff,#6538ff);border:0;box-shadow:0 8px 30px #7a38ff33}.btn.ghost{background:transparent}.btn.danger{background:#3a1023;border-color:#7d2748}
+.workspace{display:grid;grid-template-columns:minmax(430px,520px) 1fr;gap:18px;padding:18px;max-width:1800px;width:100%;margin:auto}
+.editor{background:rgba(9,12,29,.92);border:1px solid #202650;border-radius:20px;overflow:auto;max-height:calc(100vh - 108px);box-shadow:0 20px 80px #0006}.preview-wrap{min-width:0}.preview-shell{position:sticky;top:90px;height:calc(100vh - 108px);min-height:650px;background:#070916;border:1px solid #202650;border-radius:20px;overflow:hidden;box-shadow:0 20px 80px #0008}
+.section{padding:17px 18px;border-bottom:1px solid #1d2241}.section h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 12px;color:#d8d5ff}.section p.help{font-size:11px;line-height:1.5;color:var(--muted);margin:7px 0 0}.field{margin:10px 0}.field label{display:flex;justify-content:space-between;gap:10px;color:#c7c9e7;font-size:12px;margin-bottom:6px}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px solid #252b52;border-radius:10px;padding:10px;outline:none}input:focus,textarea:focus,select:focus{border-color:#8a52ff;box-shadow:0 0 0 3px #8a52ff14}textarea{min-height:78px;resize:vertical}.color{height:42px;padding:4px}.range{padding:0}
+.switch{display:flex;align-items:center;gap:9px}.switch input{width:18px;height:18px;accent-color:#a84dff}.tabs{display:flex;gap:6px;overflow:auto}.tab{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#090d20;color:#bfc2df;white-space:nowrap}.tab.active{background:#5b2bc4;color:#fff;border-color:#8e55ff}
+.upload{display:grid;grid-template-columns:1fr auto;gap:8px}.file-label{display:block;padding:10px;border:1px dashed #3b3f6a;border-radius:10px;text-align:center;color:#b9bbdb;background:#080b1d}.file-label input{display:none}
+.asset-preview{width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #262c50;background:#0b0e20;margin-top:8px}
+.question-card{border:1px solid #242a50;border-radius:14px;padding:12px;background:#090d20;margin:10px 0}.q-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.q-head b{font-size:12px}.mini{padding:7px 9px;border-radius:8px;border:1px solid #2a2f55;background:#10142c;color:#d8d9ee}.questions-list{max-height:400px;overflow:auto}
+.preview-frame{width:100%;height:100%;border:0;background:#050611}.footer-credit{text-align:center;color:#71769d;font-size:11px;padding:14px}
+@media(max-width:1100px){.workspace{grid-template-columns:1fr}.preview-shell{position:relative;top:auto;height:760px}.editor{max-height:none}.brand{min-width:auto}}
 </style>
 </head>
 <body>
-
-<div id="game-stage">
-    <div class="screen-title" id="title-screen">
-        <div class="game-title-text">${data.title}</div>
-        <button class="btn" onclick="startGame()">${i18n[data.lang].start}</button>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><span class="logo"></span><span>Neon Interrogation Studio</span></div>
+  <div class="top-actions">
+    <button class="btn" id="newBtn">＋ Новый</button>
+    <button class="btn" id="saveBtn">💾 Сохранить</button>
+    <button class="btn" id="loadBtn">📂 Загрузить</button>
+    <button class="btn" id="copyBtn">⧉ Код для Genially</button>
+    <button class="btn primary" id="downloadBtn">↓ Скачать HTML</button>
+    <input id="loadInput" type="file" accept=".json,application/json" hidden>
+  </div>
+</header>
+<main class="workspace">
+<section class="editor" id="editor">
+  <div class="section">
+    <h3>1. Основные настройки</h3>
+    <div class="field"><label>Название игры</label><input id="title" data-bind="title"></div>
+    <div class="field"><label>Подзаголовок</label><input id="subtitle" data-bind="subtitle"></div>
+    <div class="row">
+      <div class="field"><label>Язык интерфейса</label><select id="lang" data-bind="lang"></select></div>
+      <div class="field"><label>Шрифт</label><select id="font" data-bind="font"></select></div>
     </div>
-
-    <div class="hud-top">
-        <div class="lives-container" id="lives"></div>
-        <div class="timer-container" id="timer">--</div>
+    <div class="row3">
+      <div class="field"><label>Цвет названия</label><input type="color" class="color" id="titleColor" data-bind="titleColor"></div>
+      <div class="field"><label>Цвет вопроса</label><input type="color" class="color" id="questionColor" data-bind="theme.question"></div>
+      <div class="field"><label>Цвет ответа</label><input type="color" class="color" id="answerColor" data-bind="theme.answer"></div>
     </div>
-
-    <div class="character-area">
-        <img src="${data.charImage}" id="char" class="character-sprite">
+    <div class="row3">
+      <div class="field"><label>Цвет кнопок</label><input type="color" class="color" id="buttonColor" data-bind="theme.button"></div>
+      <div class="field"><label>Цвет фона игры</label><input type="color" class="color" id="gameBg" data-bind="theme.gameBg"></div>
+      <div class="field"><label>Цвет панелей</label><input type="color" class="color" id="panelColor" data-bind="theme.panel"></div>
     </div>
+    <div class="field switch"><input type="checkbox" id="titlePage" data-bind="titlePage"><label for="titlePage">Показывать титульный лист</label></div>
+  </div>
 
-    <div class="interrogation-panel">
-        <div class="polygraph-display">
-            <canvas id="ecg"></canvas>
-            <div class="stress-light" id="light"></div>
-        </div>
-        <div class="question-box" id="q-text"></div>
-        <div class="answers-grid" id="answers"></div>
-        <div id="input-area" style="display:none; width:100%;">
-            <input type="text" class="input-answer" id="inp">
-            <button class="btn" style="margin-top:10px; width:100%;" onclick="checkInput()">OK</button>
-        </div>
+  <div class="section">
+    <h3>2. Фон и персонаж</h3>
+    <div class="field"><label>Фон</label><div class="upload"><label class="file-label">Загрузить изображение<input type="file" accept="image/*" id="bgUpload"></label><button class="mini" id="clearBg">Очистить</button></div><img class="asset-preview" id="bgPreview" alt=""></div>
+    <div class="field"><label>Спрайт подозреваемого</label><div class="upload"><label class="file-label">Загрузить изображение<input type="file" accept="image/*" id="suspectUpload"></label><button class="mini" id="clearSuspect">Очистить</button></div><img class="asset-preview" id="suspectPreview" alt=""></div>
+    <div class="row">
+      <div class="field"><label>Имя подозреваемого</label><input data-bind="suspect.name"></div>
+      <div class="field"><label>Подпись / роль</label><input data-bind="suspect.role"></div>
     </div>
+  </div>
 
-    <div class="modal" id="feedback">
-        <h2 id="fb-title"></h2>
-        <p id="fb-text" style="font-size:1.2rem; max-width:600px;"></p>
-        <button class="btn" onclick="nextQ()">${i18n[data.lang].next}</button>
+  <div class="section">
+    <h3>3. Правила игры</h3>
+    <div class="row3">
+      <div class="field"><label>Жизни</label><input type="number" min="1" max="20" data-bind="settings.lives"></div>
+      <div class="field"><label>Таймер, сек</label><input type="number" min="0" max="3600" data-bind="settings.timer"></div>
+      <div class="field"><label>Интервал, сек</label><input type="number" min="0" max="60" step=".5" data-bind="settings.interval"></div>
     </div>
+    <div class="field switch"><input type="checkbox" data-bind="settings.polygraph"><label>Автоматический полиграф: ложь = красная зона + скачки графика</label></div>
+    <div class="field switch"><input type="checkbox" data-bind="settings.randomize"><label>Перемешивать вопросы</label></div>
+    <p class="help">Таймер 0 = без ограничения времени. Интервал задаёт паузу перед следующим вопросом.</p>
+  </div>
 
-    <div class="modal" id="gameover">
-        <h2 id="go-title"></h2>
-        <p id="go-text"></p>
-        <button class="btn" onclick="location.reload()">RESTART</button>
+  <div class="section">
+    <h3>4. Оформление окна задания</h3>
+    <div class="row3">
+      <div class="field"><label>Размер вопроса, px</label><input type="number" min="12" max="72" data-bind="task.questionSize"></div>
+      <div class="field"><label>Размер ответа, px</label><input type="number" min="10" max="48" data-bind="task.answerSize"></div>
+      <div class="field"><label>Радиус карточки, px</label><input type="number" min="0" max="40" data-bind="task.radius"></div>
     </div>
-    
-    <div class="author-footer">Автор: Гальмиз Мария Александровна</div>
+    <div class="row">
+      <div class="field"><label>Цвет карточки</label><input type="color" class="color" data-bind="task.card"></div>
+      <div class="field"><label>Цвет плашек ответов</label><input type="color" class="color" data-bind="task.option"></div>
+    </div>
+    <div class="field"><label>Математический язык</label><textarea data-bind="mathHelp" placeholder="Например: x^2 + y^2 = z^2, \frac{a}{b}, √(x)"></textarea><p class="help">Вопросы поддерживают простую LaTeX-подобную запись: x^2, a_1, \frac{a}{b}, √(x).</p></div>
+  </div>
+
+  <div class="section">
+    <h3>5. Вопросы и утверждения</h3>
+    <div class="tabs">
+      <button class="tab active" id="addSingle">+ Один ответ</button>
+      <button class="tab" id="addMulti">+ Несколько</button>
+      <button class="tab" id="addText">+ Ввод</button>
+      <button class="tab" id="addOral">+ Устный</button>
+      <button class="tab" id="addLie">+ Ложь/правда</button>
+    </div>
+    <p class="help">Для режима «Ложь/правда» полиграф автоматически реагирует на поле «Ложь». После нажатия «Ложь!» появляется выбор правильного опровержения.</p>
+    <div class="questions-list" id="questionsList"></div>
+  </div>
+
+  <div class="section">
+    <h3>6. Проверка и публикация</h3>
+    <button class="btn primary" id="testBtn">▶ Запустить тест в окне предпросмотра</button>
+    <button class="btn" id="resetPreviewBtn">↺ Сбросить предпросмотр</button>
+    <p class="help">Изменения отображаются справа мгновенно. Проект можно сохранить в JSON и восстановить на другом устройстве.</p>
+  </div>
+  <div class="footer-credit">Автор редактора: <b>Гальмиз Мария Александровна</b></div>
+</section>
+
+<section class="preview-wrap">
+  <div class="preview-shell"><iframe id="preview" class="preview-frame" title="Предпросмотр игры"></iframe></div>
+</section>
+</main>
 </div>
 
 <script>
-    const state = ${JSON.stringify(data)};
-    const i18n = ${JSON.stringify(i18n)};
-    let currentIdx = 0;
-    let lives = 0;
-    let timerInt = null;
-    let timeLeft = 0;
-    let isLying = false;
-    let ecgCtx, ecgX = 0;
-
-    function init() {
-        const c = document.getElementById('ecg');
-        c.width = c.parentElement.offsetWidth;
-        c.height = c.parentElement.offsetHeight;
-        ecgCtx = c.getContext('2d');
-        loop();
-    }
-
-    function loop() {
-        if(document.getElementById('title-screen').style.display !== 'none' && document.getElementById('title-screen').style.display !== '') {
-             requestAnimationFrame(loop); return;
-        }
-        ecgCtx.fillStyle = 'rgba(0,0,0,0.1)';
-        ecgCtx.fillRect(0,0,ecgCtx.canvas.width, ecgCtx.canvas.height);
-        ecgCtx.beginPath();
-        ecgCtx.strokeStyle = isLying ? '#ff0055' : '#00f3ff';
-        ecgCtx.lineWidth = 2;
-        const noise = isLying ? (Math.random()*40-20) : (Math.random()*10-5);
-        const spike = isLying && Math.random()>0.8 ? 50 : 0;
-        const y = ecgCtx.canvas.height/2 + noise + spike;
-        if(ecgX===0) ecgCtx.moveTo(0,y); else ecgCtx.lineTo(ecgX,y);
-        ecgCtx.stroke();
-        ecgX+=2;
-        if(ecgX>ecgCtx.canvas.width) { ecgX=0; ecgCtx.clearRect(0,0,ecgCtx.canvas.width,ecgCtx.canvas.height); }
-        
-        const l = document.getElementById('light');
-        l.className = 'stress-light ' + (isLying ? 'red' : 'green');
-        requestAnimationFrame(loop);
-    }
-
-    function startGame() {
-        document.getElementById('title-screen').style.display = 'none';
-        lives = state.lives;
-        currentIdx = 0;
-        updateLives();
-        loadQ();
-    }
-
-    function updateLives() {
-        let h = ''; for(let i=0;i<lives;i++) h+='<i class="fas fa-heart"></i>';
-        document.getElementById('lives').innerHTML = h;
-    }
-
-    function loadQ() {
-        if(currentIdx >= state.questions.length) { endGame(true); return; }
-        const q = state.questions[currentIdx];
-        document.getElementById('q-text').innerHTML = q.text;
-        if(window.MathJax) MathJax.typesetPromise();
-        
-        isLying = q.correct.includes(1) || q.type === 'input';
-        
-        const ans = document.getElementById('answers');
-        const inp = document.getElementById('input-area');
-        ans.innerHTML = ''; ans.style.display = 'grid'; inp.style.display = 'none';
-
-        if(q.type === 'input') {
-            ans.style.display = 'none'; inp.style.display = 'block';
-            document.getElementById('inp').value = '';
-        } else if (q.type === 'oral') {
-            ans.innerHTML = '<button class="answer-btn" onclick="showOral()">Ответить</button>';
-        } else {
-            q.options.forEach((o, i) => {
-                const b = document.createElement('div');
-                b.className = 'answer-btn'; b.innerText = o;
-                b.onclick = () => check(i, b);
-                ans.appendChild(b);
-            });
-        }
-
-        clearInterval(timerInt);
-        if(state.timer > 0) {
-            timeLeft = state.timer;
-            document.getElementById('timer').innerText = timeLeft;
-            timerInt = setInterval(() => {
-                timeLeft--; document.getElementById('timer').innerText = timeLeft;
-                if(timeLeft<=0) fail("Time out!");
-            }, 1000);
-        } else { document.getElementById('timer').innerText = '--'; }
-        
-        const ch = document.getElementById('char');
-        ch.classList.add('speaking'); setTimeout(()=>ch.classList.remove('speaking'), 2000);
-    }
-
-    function check(i, el) {
-        const q = state.questions[currentIdx];
-        if(q.correct.includes(i)) {
-            el.classList.add('correct'); isLying = false;
-            setTimeout(()=>{ currentIdx++; loadQ(); }, state.spawnInterval);
-        } else {
-            el.classList.add('wrong');
-            fail(q.explanation);
-        }
-    }
-
-    function checkInput() {
-        const v = document.getElementById('inp').value.toLowerCase().trim();
-        const valid = state.questions[currentIdx].options[0].toLowerCase().split('|').map(s=>s.trim());
-        if(valid.includes(v)) { isLying=false; setTimeout(()=>{currentIdx++; loadQ();}, state.spawnInterval); }
-        else fail(state.questions[currentIdx].explanation);
-    }
-
-    function showOral() {
-        showFb("Answer:", state.questions[currentIdx].options.join(', '), true);
-    }
-
-    function fail(exp) {
-        clearInterval(timerInt); lives--; updateLives(); isLying = true;
-        if(lives<=0) endGame(false);
-        else showFb("ERROR / LIE", exp, false);
-    }
-
-    function showFb(t, txt, adv) {
-        document.getElementById('fb-title').innerText = t;
-        document.getElementById('fb-text').innerText = txt;
-        document.getElementById('feedback').style.display = 'flex';
-        document.getElementById('feedback').dataset.adv = adv;
-    }
-
-    function nextQ() {
-        document.getElementById('feedback').style.display = 'none';
-        if(document.getElementById('feedback').dataset.adv === "true") currentIdx++;
-        else currentIdx++; 
-        loadQ();
-    }
-
-    function endGame(win) {
-        clearInterval(timerInt);
-        document.getElementById('gameover').style.display = 'flex';
-        document.getElementById('go-title').innerText = win ? "CASE CLOSED" : "GAME OVER";
-        document.getElementById('go-text').innerText = win ? "You found the truth." : "The suspect deceived you.";
-    }
-
-    window.onload = init;
-<\/script>
-</body>
-</html>
-        `;
-    }
-
+const LANGS={
+ru:{name:"Русский",start:"СТАРТ",lie:"ЛОЖЬ!",accuse:"ПРЕДЪЯВИТЬ ОПРОВЕРЖЕНИЕ",next:"ДАЛЬШЕ",check:"ПРОВЕРИТЬ",time:"ВРЕМЯ",lives:"ЖИЗНИ",truth:"ПРАВДА",false:"ЛОЖЬ",correct:"Верно!",wrong:"Неверно!",over:"Игра окончена",win:"Вы победили!",rebuttal:"Выберите правильное опровержение:",restart:"Играть снова",titleStart:"Начать допрос",statement:"Утверждение",question:"Вопрос",answer:"Ответ",oral:"Произнесите ответ вслух",submit:"Ответить",noTitle:"Начать игру"},
+en:{name:"English",start:"START",lie:"LIE!",accuse:"SHOW REFUTATION",next:"NEXT",check:"CHECK",time:"TIME",lives:"LIVES",truth:"TRUE",false:"FALSE",correct:"Correct!",wrong:"Incorrect!",over:"Game over",win:"You win!",rebuttal:"Choose the correct refutation:",restart:"Play again",titleStart:"Start interrogation",statement:"Statement",question:"Question",answer:"Answer",oral:"Say your answer aloud",submit:"Answer",noTitle:"Start game"},
+kk:{name:"Қазақша",start:"БАСТАУ",lie:"ӨТІРІК!",accuse:"ТЕРІСТЕУДІ КӨРСЕТУ",next:"КЕЛЕСІ",check:"ТЕКСЕРУ",time:"УАҚЫТ",lives:"ӨМІР",truth:"ШЫНДЫҚ",false:"ӨТІРІК",correct:"Дұрыс!",wrong:"Қате!",over:"Ойын аяқталды",win:"Жеңіс!",rebuttal:"Дұрыс терістеуді таңдаңыз:",restart:"Қайта ойнау",titleStart:"Сұрақ алуды бастау",statement:"Мәлімдеме",question:"Сұрақ",answer:"Жауап",oral:"Жауапты дауыстап айтыңыз",submit:"Жауап беру",noTitle:"Ойынды бастау"},
+de:{name:"Deutsch",start:"START",lie:"LÜGE!",accuse:"WIDERLEGUNG",next:"WEITER",check:"PRÜFEN",time:"ZEIT",lives:"LEBEN",truth:"WAHR",false:"FALSCH",correct:"Richtig!",wrong:"Falsch!",over:"Spiel vorbei",win:"Gewonnen!",rebuttal:"Wähle die richtige Widerlegung:",restart:"Nochmal",titleStart:"Verhör starten",statement:"Aussage",question:"Frage",answer:"Antwort",oral:"Antwort laut sagen",submit:"Antworten",noTitle:"Spiel starten"},
+fr:{name:"Français",start:"DÉMARRER",lie:"MENSONGE !",accuse:"AFFICHER LA RÉFUTATION",next:"SUIVANT",check:"VÉRIFIER",time:"TEMPS",lives:"VIES",truth:"VRAI",false:"FAUX",correct:"Correct !",wrong:"Incorrect !",over:"Fin du jeu",win:"Bravo !",rebuttal:"Choisissez la bonne réfutation :",restart:"Rejouer",titleStart:"Commencer l'interrogatoire",statement:"Affirmation",question:"Question",answer:"Réponse",oral:"Dites votre réponse",submit:"Répondre",noTitle:"Commencer le jeu"},
+es:{name:"Español",start:"INICIAR",lie:"¡MENTIRA!",accuse:"MOSTRAR REFUTACIÓN",next:"SIGUIENTE",check:"COMPROBAR",time:"TIEMPO",lives:"VIDAS",truth:"VERDAD",false:"FALSO",correct:"¡Correcto!",wrong:"¡Incorrecto!",over:"Fin del juego",win:"¡Ganaste!",rebuttal:"Elige la refutación correcta:",restart:"Jugar de nuevo",titleStart:"Iniciar interrogatorio",statement:"Afirmación",question:"Pregunta",answer:"Respuesta",oral:"Di tu respuesta en voz alta",submit:"Responder",noTitle:"Iniciar juego"}
+};
+const FONTS={Inter:"Inter,Arial,sans-serif",Orbitron:"Orbitron,Arial,sans-serif",Montserrat:"Montserrat,Arial,sans-serif","Space Grotesk":"'Space Grotesk',Arial,sans-serif",Georgia:"Georgia,serif",Verdana:"Verdana,sans-serif","Courier New":"'Courier New',monospace"};
+const defaults={title:"Допрос подозреваемого",subtitle:"Interrogation & Heart Rate",lang:"ru",font:"Inter",titlePage:true,titleColor:"#d95cff",suspect:{name:"ПОДОЗРЕВАЕМЫЙ",role:"Свидетель"},bg:"",suspectImg:"",theme:{question:"#ffffff",answer:"#d8d9ff",button:"#9a43ff",gameBg:"#050713",panel:"#0d1126"},settings:{lives:3,timer:0,interval:1.5,polygraph:true,randomize:false},task:{questionSize:30,answerSize:17,radius:18,card:"#0d122b",option:"#151b3b"},mathHelp:"",questions:[
+{id:1,type:"lie",text:"Я лично построил первый русский пароход.",truth:false,options:[],correct:[],rebuttals:["Пароходы появились в России позже; утверждение приписывает строительство не тому человеку.","Это утверждение исторически неверно."],correctRebuttal:0,explanation:"Проверьте дату и автора изобретения."},
+{id:2,type:"single",text:"Какой город стал столицей России при Петре I?",options:["Москва","Санкт-Петербург","Казань","Тула"],correct:[1],rebuttals:[],correctRebuttal:0,explanation:"Пётр I перенёс столицу в Санкт-Петербург в 1712 году."},
+{id:3,type:"multi",text:"Выберите факты, связанные с Петром I.",options:["Основание Санкт-Петербурга","Развитие флота","Отмена крепостного права","Военная реформа"],correct:[0,1,3],rebuttals:[],correctRebuttal:0,explanation:"Ключевые реформы Петра включали флот и военную систему."},
+{id:4,type:"text",text:"В каком году Санкт-Петербург стал столицей России?",options:[],correct:["1712"],rebuttals:[],correctRebuttal:0,explanation:"В 1712 году."},
+{id:5,type:"oral",text:"Назовите одну реформу Петра I и кратко объясните её значение.",options:[],correct:[""],rebuttals:[],correctRebuttal:0,explanation:"Учитель может оценить устный ответ вручную."}
+]};
+let state=structuredClone(defaults);
+const $=s=>document.querySelector(s);
+function getPath(obj,path){return path.split(".").reduce((a,k)=>a?.[k],obj)}
+function setPath(obj,path,val){const p=path.split(".");let x=obj;for(let i=0;i<p.length-1;i++)x=x[p[i]];x[p[p.length-1]]=val}
+function escapeHTML(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function fileToData(file,cb){const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(file)}
+function initControls(){
+  Object.entries(LANGS).forEach(([k,v])=>$("#lang").insertAdjacentHTML("beforeend",`<option value="${k}">${v.name}</option>`));
+  Object.keys(FONTS).forEach(k=>$("#font").insertAdjacentHTML("beforeend",`<option value="${k}">${k}</option>`));
+  document.querySelectorAll("[data-bind]").forEach(el=>{
+    const v=getPath(state,el.dataset.bind); if(el.type==="checkbox")el.checked=!!v; else el.value=v??"";
+    const sync=()=>{let val=el.type==="checkbox"?el.checked:el.value;if(el.type==="number")val=Number(val);setPath(state,el.dataset.bind,val);renderAll()};
+    el.addEventListener("input",sync);el.addEventListener("change",sync);
+  });
+  $("#bgUpload").onchange=e=>{const f=e.target.files[0];if(f)fileToData(f,x=>{state.bg=x;renderAll()})};
+  $("#suspectUpload").onchange=e=>{const f=e.target.files[0];if(f)fileToData(f,x=>{state.suspectImg=x;renderAll()})};
+  $("#clearBg").onclick=()=>{state.bg="";renderAll()};$("#clearSuspect").onclick=()=>{state.suspectImg="";renderAll()};
+  $("#addSingle").onclick=()=>addQuestion("single");$("#addMulti").onclick=()=>addQuestion("multi");$("#addText").onclick=()=>addQuestion("text");$("#addOral").onclick=()=>addQuestion("oral");$("#addLie").onclick=()=>addQuestion("lie");
+  $("#saveBtn").onclick=saveProject;$("#loadBtn").onclick=()=>$("#loadInput").click();$("#loadInput").onchange=loadProject;$("#downloadBtn").onclick=downloadHTML;$("#copyBtn").onclick=copyGenially;
+  $("#newBtn").onclick=()=>{if(confirm("Начать новый проект?")){state=structuredClone(defaults);renderAll()}};
+  $("#testBtn").onclick=()=>postPreview({cmd:"start"});$("#resetPreviewBtn").onclick=()=>postPreview({cmd:"reset"});
+}
+function addQuestion(type){
+  const q={id:Date.now(),type,text:type==="lie"?"Введите утверждение подозреваемого…":"Введите вопрос…",options:type==="single"||type==="multi"?["Вариант 1","Вариант 2"]:[],correct:type==="text"?[""]:type==="single"?[0]:type==="multi"?[0]:[],truth:type==="lie"?false:true,rebuttals:type==="lie"?["Введите правильное опровержение…"]:[],correctRebuttal:0,explanation:""};
+  state.questions.push(q);renderAll();
+}
+function qTypeName(t){return({single:"Один ответ",multi:"Несколько ответов",text:"Ввод ответа",oral:"Устный ответ",lie:"Ложь / правда"})[t]||t}
+function renderQuestions(){
+  $("#questionsList").innerHTML=state.questions.map((q,i)=>`
+  <div class="question-card" data-q="${q.id}">
+   <div class="q-head"><b>${i+1}. ${qTypeName(q.type)}</b><button class="mini delq">Удалить</button></div>
+   <div class="field"><label>Текст вопроса / утверждения</label><textarea class="qtext">${escapeHTML(q.text)}</textarea></div>
+   ${q.type==="lie"?`<div class="row"><div class="field switch"><input class="qtruth" type="checkbox" ${q.truth?"checked":""}><label>Это ПРАВДА (иначе — ложь)</label></div><div class="field"><label>Объяснение</label><input class="qexp" value="${escapeHTML(q.explanation)}"></div></div>
+   <div class="field"><label>Варианты опровержения (каждый с новой строки)</label><textarea class="qrebut">${escapeHTML(q.rebuttals.join("\n"))}</textarea></div>
+   <div class="field"><label>Номер правильного опровержения</label><input class="qri" type="number" min="1" value="${(q.correctRebuttal??0)+1}"></div>`
+   :q.type==="single"||q.type==="multi"?`<div class="field"><label>Варианты ответа (каждый с новой строки)</label><textarea class="qopts">${escapeHTML(q.options.join("\n"))}</textarea></div><div class="field"><label>Правильные номера (для нескольких — через запятую)</label><input class="qcorrect" value="${q.correct.map(x=>Number(x)+1).join(",")}"></div><div class="field"><label>Пояснение после ответа</label><input class="qexp" value="${escapeHTML(q.explanation)}"></div>`
+   :q.type==="text"?`<div class="field"><label>Правильные ответы (через |, без учёта регистра)</label><input class="qcorrect" value="${escapeHTML(q.correct.join(" | "))}"></div><div class="field"><label>Пояснение</label><input class="qexp" value="${escapeHTML(q.explanation)}"></div>`
+   :`<div class="field"><label>Критерий / подсказка для учителя</label><input class="qexp" value="${escapeHTML(q.explanation)}"></div>`}
+  </div>`).join("");
+  $("#questionsList").querySelectorAll(".question-card").forEach(card=>{
+    const q=state.questions.find(x=>x.id==card.dataset.q);
+    const sync=()=>{q.text=card.querySelector(".qtext").value;if(card.querySelector(".qtruth"))q.truth=card.querySelector(".qtruth").checked;if(card.querySelector(".qopts"))q.options=card.querySelector(".qopts").value.split("\n").filter(Boolean);if(card.querySelector(".qcorrect")){const s=card.querySelector(".qcorrect").value;if(q.type==="text")q.correct=s.split("|").map(x=>x.trim()).filter(Boolean);else q.correct=s.split(",").map(x=>Number(x.trim())-1).filter(x=>x>=0)}if(card.querySelector(".qrebut"))q.rebuttals=card.querySelector(".qrebut").value.split("\n").filter(Boolean);if(card.querySelector(".qri"))q.correctRebuttal=Math.max(0,Number(card.querySelector(".qri").value||1)-1);if(card.querySelector(".qexp"))q.explanation=card.querySelector(".qexp").value;renderPreview()};
+    card.querySelectorAll("input,textarea").forEach(el=>el.addEventListener("input",sync));card.querySelector(".delq").onclick=()=>{state.questions=state.questions.filter(x=>x.id!=q.id);renderAll()};
+  });
+}
+function renderAll(){
+  $("#bgPreview").src=state.bg||"data:image/svg+xml;charset=utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="100%" height="100%" fill="#0a0d1e"/><text x="50%" y="50%" text-anchor="middle" fill="#666b92" font-family="Arial" font-size="18">Фон не загружен</text></svg>`);
+  $("#suspectPreview").src=state.suspectImg||"data:image/svg+xml;charset=utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="100%" height="100%" fill="#0a0d1e"/><text x="50%" y="50%" text-anchor="middle" fill="#666b92" font-family="Arial" font-size="18">Спрайт не загружен</text></svg>`);
+  $("#lang").value=state.lang;$("#font").value=state.font;renderQuestions();renderPreview();
+}
+function buildGameHTML(){
+const cfg=JSON.stringify(state).replace(/</g,"\\u003c");
+return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.title)}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:${FONTS[state.font]||FONTS.Inter};background:${state.theme.gameBg};color:#fff;overflow:auto}.app{min-height:100vh;background-image:${state.bg?`linear-gradient(#03040b99,#03040bcc),url("${state.bg}")`:"radial-gradient(circle at 70% 10%,#28105a 0,#070817 45%,#03040b 100%)"};background-size:cover;background-position:center;padding:24px}.wrap{max-width:1250px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px}.title{font-size:clamp(28px,4vw,54px);font-weight:900;color:${state.titleColor};text-shadow:0 0 28px ${state.titleColor}66}.sub{color:#b5b7d5;margin-top:4px}.hud{display:flex;gap:9px;flex-wrap:wrap}.badge{background:#0c1026dd;border:1px solid #292f58;border-radius:12px;padding:9px 13px;font-weight:700}.game{display:grid;grid-template-columns:minmax(280px,38%) 1fr;gap:18px;align-items:stretch}.suspect,.task,.poly{background:${state.theme.panel}e8;border:1px solid #2a3060;border-radius:${state.task.radius}px;box-shadow:0 18px 60px #0007}.suspect{padding:18px;display:flex;flex-direction:column;justify-content:space-between;min-height:540px}.suspect img{width:100%;height:390px;object-fit:contain;border-radius:14px;background:#080b1b}.who{font-size:18px;font-weight:800;margin-top:12px}.role{font-size:12px;color:#9ca2c9}.poly{margin-top:18px;padding:12px}.polyhead{display:flex;justify-content:space-between;font-size:11px;color:#aeb2d3}.zone{height:9px;border-radius:9px;background:linear-gradient(90deg,#2be2a1 0 58%,#ffd45a 58% 76%,#ff3d73 76%);margin:8px 0;position:relative}.needle{position:absolute;top:-4px;width:4px;height:17px;background:white;left:18%;box-shadow:0 0 10px white;transition:left .35s}.lights{display:flex;gap:8px}.light{width:14px;height:14px;border-radius:50%;background:#28304b}.light.green.on{background:#31e6a2;box-shadow:0 0 14px #31e6a2}.light.red.on{background:#ff4d78;box-shadow:0 0 14px #ff4d78}.chart{height:78px;overflow:hidden;margin-top:7px;border-radius:8px;background:#070a18}.chart svg{width:100%;height:100%}.task{padding:24px;min-height:540px;display:flex;flex-direction:column;justify-content:center}.label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8e95bf;margin-bottom:10px}.question{font-size:${state.task.questionSize}px;line-height:1.18;color:${state.theme.question};font-weight:800;margin-bottom:20px}.options{display:grid;gap:10px}.option{width:100%;text-align:left;border:1px solid #313864;background:${state.task.option};color:${state.theme.answer};border-radius:${state.task.radius}px;padding:14px;font-size:${state.task.answerSize}px}.option:hover{border-color:${state.theme.button};box-shadow:0 0 20px ${state.theme.button}22}.option.selected{border-color:${state.theme.button};background:${state.theme.button}33}.option.correct{border-color:#31e6a2;background:#31e6a222}.option.wrong{border-color:#ff4d78;background:#ff4d7822;color:#fff}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.mainbtn{border:0;border-radius:12px;padding:13px 18px;background:${state.theme.button};color:#fff;font-weight:900;box-shadow:0 10px 30px ${state.theme.button}44}.secondary{background:#141936;border:1px solid #33395e}.hidden{display:none!important}.notice{margin-top:12px;color:#c4c7e2;line-height:1.5}.start{min-height:70vh;display:grid;place-items:center}.startcard{max-width:700px;text-align:center;background:#0d1126e8;border:1px solid #343a70;padding:40px;border-radius:26px;box-shadow:0 25px 100px #0009}.startcard h1{font-size:clamp(32px,6vw,68px);color:${state.titleColor};margin:0 0 10px}.timerbar{height:5px;background:#202643;border-radius:5px;overflow:hidden;margin:10px 0}.timerfill{height:100%;width:100%;background:${state.theme.button};transform-origin:left}.end{text-align:center;padding:70px 20px}.end h2{font-size:48px;color:${state.titleColor}}.rebut{margin-top:16px;border:1px solid #40476e;padding:15px;border-radius:14px;background:#090d20}.frac{display:inline-flex;vertical-align:middle;flex-direction:column;text-align:center;margin:0 4px}.frac span:first-child{border-bottom:1px solid currentColor;padding:0 3px}.frac span:last-child{padding:0 3px}.radicand{border-top:1px solid currentColor}.footer{text-align:center;color:#72789d;font-size:11px;padding:25px}.liebtn{background:#ff3b6e!important;box-shadow:0 10px 35px #ff3b6e55!important}.accuse{background:#22294a!important}@media(max-width:900px){.game{grid-template-columns:1fr}.suspect{min-height:350px}.suspect img{height:280px}.task{min-height:450px}}
+</style></head><body><div class="app"><div class="wrap" id="root"></div><div class="footer">Автор: Гальмиз Мария Александровна</div></div>
+<script>
+const CFG=${cfg};
+const T=(LANGS_PLACEHOLDER)[CFG.lang]||(LANGS_PLACEHOLDER).ru;
+let qs=CFG.questions.slice();if(CFG.settings.randomize)qs.sort(()=>Math.random()-.5);let i=-1,lives=CFG.settings.lives,time=CFG.settings.timer,clock=null,selected=[];
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function math(s){s=esc(s);s=s.replace(/\\\\frac\\{([^{}]+)\\}\\{([^{}]+)\\}/g,'<span class="frac"><span>$1</span><span>$2</span></span>');s=s.replace(/\\^([A-Za-z0-9]+)/g,'<sup>$1</sup>').replace(/_([A-Za-z0-9]+)/g,'<sub>$1</sub>');s=s.replace(/√\\(([^)]+)\\)/g,'√<span class="radicand">$1</span>');return s}
+function start(){i=-1;lives=CFG.settings.lives;next();document.querySelector(".start")?.remove()}
+function renderStart(){document.querySelector("#root").innerHTML=CFG.titlePage?'<div class="start"><div class="startcard"><h1>'+esc(CFG.title)+'</h1><p class="sub">'+esc(CFG.subtitle)+'</p><p class="notice">'+esc(CFG.suspect.name)+' · '+esc(CFG.suspect.role)+'</p><button class="mainbtn" onclick="start()">'+T.titleStart+'</button></div></div>':'<div></div>';if(!CFG.titlePage)start()}
+function next(){clearInterval(clock);i++;selected=[];if(i>=qs.length){end(true);return}time=CFG.settings.timer;renderQuestion();if(CFG.settings.timer>0){clock=setInterval(()=>{time--;updateTimer();if(time<=0){clearInterval(clock);wrong(true)}},1000)}}
+function updateTimer(){const el=document.querySelector("#timerfill");if(el)el.style.width=Math.max(0,time/CFG.settings.timer*100)+"%";const tt=document.querySelector("#timerText");if(tt)tt.textContent=time+"s"}
+function poly(lie){const needle=document.querySelector(".needle"),red=document.querySelector(".light.red"),green=document.querySelector(".light.green"),path=document.querySelector("#wave");if(!needle)return;needle.style.left=(lie?88:24)+"%";red.classList.toggle("on",lie);green.classList.toggle("on",!lie);let d="M0 50";for(let x=0;x<=500;x+=10){let amp=lie?24:7;let y=50+Math.sin(x/(lie?7:18))*amp+(Math.random()-0.5)*(lie?8:2);d+=" L"+x+" "+y}path.setAttribute("d",d)}
+function renderQuestion(){const q=qs[i],isLie=q.type==="lie";document.querySelector("#root").innerHTML='<div class="top"><div><div class="title">'+esc(CFG.title)+'</div><div class="sub">'+esc(CFG.subtitle)+'</div></div><div class="hud"><span class="badge">'+T.lives+': '+ '❤'.repeat(Math.max(0,lives))+'</span>'+(CFG.settings.timer>0?'<span class="badge">'+T.time+': <span id="timerText">'+time+'s</span></span>':'')+'</div></div><div class="game"><div><div class="suspect">'+(CFG.suspectImg?'<img src="'+CFG.suspectImg+'" onerror="this.style.display=\\'none\\'">':'')+'<div><div class="who">'+esc(CFG.suspect.name)+'</div><div class="role">'+esc(CFG.suspect.role)+'</div></div></div><div class="poly"><div class="polyhead"><span>POLYGRAPH / HEART RATE</span><span id="zoneText">NORMAL</span></div><div class="zone"><span class="needle"></span></div><div class="lights"><span class="light green"></span><span class="light red"></span></div><div class="chart"><svg viewBox="0 0 500 100" preserveAspectRatio="none"><path id="wave" d="M0 50 L500 50" fill="none" stroke="#7e8bff" stroke-width="3"/></svg></div></div></div><div class="task"><div class="label">'+(isLie?T.statement:T.question)+' · '+(i+1)+' / '+qs.length+'</div><div class="question">'+math(q.text)+'</div><div id="answerArea"></div><div class="actions" id="actions"></div><div class="notice" id="notice"></div></div></div>'+(CFG.settings.timer>0?'<div class="timerbar"><div id="timerfill" class="timerfill"></div></div>':'');poly(isLie&&!q.truth);setupAnswer(q)}
+function setupAnswer(q){const area=document.querySelector("#answerArea"),actions=document.querySelector("#actions"),notice=document.querySelector("#notice");if(q.type==="lie"){area.innerHTML='<div class="oral">'+(q.truth?T.truth:T.false)+'. '+(q.truth?'Полиграф остаётся в зелёной зоне.':'Полиграф реагирует на стресс: красная зона.')+'</div>';actions.innerHTML='<button class="mainbtn liebtn" onclick="judgeLie()">'+T.lie+'</button><button class="mainbtn secondary" onclick="judgeTruth()">'+T.truth+'</button>';return}
+if(q.type==="oral"){area.innerHTML='<div class="oral">'+T.oral+'</div>';actions.innerHTML='<button class="mainbtn" onclick="oralAnswer()">'+T.submit+'</button>';return}
+if(q.type==="text"){area.innerHTML='<input id="textAnswer" style="font-size:'+CFG.task.answerSize+'px" placeholder="'+esc(T.answer)+'">';actions.innerHTML='<button class="mainbtn" onclick="checkText()">'+T.check+'</button>';return}
+area.innerHTML='<div class="options">'+q.options.map((x,j)=>'<button class="option" data-j="'+j+'" onclick="pick('+j+')">'+math(x)+'</button>').join('')+'</div>';actions.innerHTML='<button class="mainbtn" onclick="checkChoice()">'+T.check+'</button>';if(q.type==="multi")notice.textContent="Можно выбрать несколько вариантов."}
+function pick(j){const q=qs[i];if(q.type==="single")selected=[j];else selected=selected.includes(j)?selected.filter(x=>x!==j):[...selected,j];document.querySelectorAll(".option").forEach((b,k)=>b.classList.toggle("selected",selected.includes(k)))}
+function markCorrect(indices){document.querySelectorAll(".option").forEach((b,j)=>{b.classList.toggle("correct",indices.includes(j));b.classList.remove("selected")})}
+function wrong(timeout=false){lives--;document.querySelectorAll(".option").forEach((b,j)=>{if(selected.includes(j))b.classList.add("wrong")});const n=document.querySelector("#notice");if(n)n.textContent=T.wrong+(timeout?" — "+T.time:"");if(lives<=0){setTimeout(()=>end(false),700);return}setTimeout(next,Math.max(0,CFG.settings.interval*1000))}
+function good(){const n=document.querySelector("#notice");if(n)n.textContent=T.correct;setTimeout(next,Math.max(0,CFG.settings.interval*1000))}
+function checkChoice(){const q=qs[i],a=[...selected].sort((a,b)=>a-b),c=[...q.correct].sort((a,b)=>a-b),ok=JSON.stringify(a)===JSON.stringify(c);if(ok){markCorrect(c);good()}else wrong(false)}
+function checkText(){const q=qs[i],v=(document.querySelector("#textAnswer").value||"").trim().toLowerCase(),ok=q.correct.some(x=>v===String(x).trim().toLowerCase());if(ok)good();else{document.querySelector("#textAnswer").style.borderColor="#ff4d78";wrong(false)}}
+function oralAnswer(){const n=document.querySelector("#notice");if(n)n.textContent=T.correct+" "+(qs[i].explanation||"");setTimeout(next,Math.max(0,CFG.settings.interval*1000))}
+function judgeLie(){const q=qs[i];if(q.truth){poly(false);wrong(false);return}poly(true);document.querySelector("#zoneText").textContent="STRESS / LIE";document.querySelector("#actions").innerHTML='<button class="mainbtn accuse" onclick="showRebuttal()">'+T.accuse+'</button>';document.querySelector("#notice").textContent=T.correct}
+function judgeTruth(){const q=qs[i];if(q.truth){poly(false);good()}else{poly(true);wrong(false)}}
+function showRebuttal(){const q=qs[i],a=document.querySelector("#answerArea");a.innerHTML='<div class="label">'+T.rebuttal+'</div><div class="options">'+q.rebuttals.map((x,j)=>'<button class="option" onclick="rebut('+j+')">'+esc(x)+'</button>').join('')+'</div>';document.querySelector("#actions").innerHTML=""}
+function rebut(j){const q=qs[i];if(j===q.correctRebuttal){document.querySelector("#notice").textContent=T.correct+" "+(q.explanation||"");setTimeout(next,Math.max(0,CFG.settings.interval*1000))}else{document.querySelector("#notice").textContent=T.wrong;wrong(false)}}
+window.addEventListener("message",e=>{if(e.data?.cmd==="start")start();if(e.data?.cmd==="reset")renderStart()});renderStart();
+<\/script></body></html>`;
+}
+function renderPreview(){const html=buildGameHTML().replace("(LANGS_PLACEHOLDER)",JSON.stringify(LANGS));$("#preview").srcdoc=html}
+function postPreview(msg){$("#preview").contentWindow?.postMessage(msg,"*")}
+function saveProject(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(state.title||"interrogation-project").replace(/[^\wа-яё-]+/gi,"_")+".json";a.click();URL.revokeObjectURL(a.href)}
+function loadProject(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);renderAll()}catch{alert("Не удалось прочитать проект JSON.")}};r.readAsText(f);e.target.value=""}
+function downloadHTML(){const html=buildGameHTML().replace("(LANGS_PLACEHOLDER)",JSON.stringify(LANGS));const blob=new Blob([html],{type:"text/html;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(state.title||"interrogation-game").replace(/[^\wа-яё-]+/gi,"_")+".html";a.click();URL.revokeObjectURL(a.href)}
+async function copyGenially(){const html=buildGameHTML().replace("(LANGS_PLACEHOLDER)",JSON.stringify(LANGS));const code='<iframe title="'+escapeHTML(state.title)+'" style="width:100%;height:800px;border:0;border-radius:18px" srcdoc="'+html.replace(/"/g,"&quot;")+'"></iframe>';try{await navigator.clipboard.writeText(code);alert("Код iframe скопирован. В Genially вставьте его в блок, поддерживающий HTML/embed.")}catch{prompt("Скопируйте код:",code)}}
+initControls();renderAll();
 </script>
-
 </body>
 </html>
