@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -612,10 +613,46 @@
         let polygraphOffset = 0;
         let isStressActive = false;
 
+        // Безопасное экранирование строк для атрибутов HTML
+        function safeAttr(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#39;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;');
+        }
+
+        // Функция для вызова KaTeX с проверкой готовности библиотеки
+        function renderMath(element) {
+            if (typeof renderMathInElement === 'function') {
+                try {
+                    renderMathInElement(element, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ]
+                    });
+                } catch(e) {
+                    console.error("Ошибка KaTeX:", e);
+                }
+            } else {
+                setTimeout(() => renderMath(element), 100);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             renderQuestions();
             updateConfig();
             initPolygraph();
+        });
+
+        // Отслеживание размера экрана для адаптации полиграфа
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('polygraph-canvas');
+            if (canvas && canvas.parentElement) {
+                canvas.width = canvas.parentElement.clientWidth;
+            }
         });
 
         // Переключение вкладок в редакторе
@@ -707,6 +744,26 @@
             project.questions.forEach((q, index) => {
                 const card = document.createElement('div');
                 card.className = "p-4 rounded-xl bg-cyberCard border border-cyberBorder space-y-3 relative";
+                
+                let optionsHtml = '';
+                if (q.type === 'multi') {
+                    optionsHtml = `
+                        <div id="opt-container-${index}" class="space-y-1.5">
+                            <label class="block text-[10px] text-slate-400 font-bold">Варианты ответа (первый - всегда верный):</label>
+                            <input type="text" placeholder="Верный вариант" value="${safeAttr(q.options[0])}" oninput="updateOption(${index}, 0, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
+                            <input type="text" placeholder="Неверный вариант 1" value="${safeAttr(q.options[1])}" oninput="updateOption(${index}, 1, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
+                            <input type="text" placeholder="Неверный вариант 2" value="${safeAttr(q.options[2])}" oninput="updateOption(${index}, 2, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
+                        </div>
+                    `;
+                } else if (q.type === 'input') {
+                    optionsHtml = `
+                        <div>
+                            <label class="block text-[10px] text-slate-300 mb-1">Правильный текстовый ответ</label>
+                            <input type="text" value="${safeAttr(q.options[0])}" oninput="updateOption(${index}, 0, this.value)" class="w-full px-2 py-1 rounded bg-cyberDark border border-cyberBorder text-xs">
+                        </div>
+                    `;
+                }
+
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-orbitron font-bold text-cyberCyan">Утверждение #${index + 1}</span>
@@ -722,7 +779,7 @@
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-300 mb-1">Утверждение подозреваемого (поддерживает $\\mathbf{E=mc^2}$)</label>
-                        <textarea oninput="updateQuestionField(${index}, 'text', this.value)" class="w-full px-2 py-1.5 rounded bg-cyberDark border border-cyberBorder text-xs" rows="2">${q.text}</textarea>
+                        <textarea oninput="updateQuestionField(${index}, 'text', this.value)" class="w-full px-2 py-1.5 rounded bg-cyberDark border border-cyberBorder text-xs" rows="2">${safeAttr(q.text)}</textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -736,35 +793,15 @@
                         </div>
                         <div>
                             <label class="block text-[10px] text-slate-300 mb-1">Опровержение лжи / Объяснение</label>
-                            <input type="text" value="${q.explanation || ''}" oninput="updateQuestionField(${index}, 'explanation', this.value)" class="w-full px-2 py-1.5 rounded bg-cyberDark border border-cyberBorder text-xs">
+                            <input type="text" value="${safeAttr(q.explanation)}" oninput="updateQuestionField(${index}, 'explanation', this.value)" class="w-full px-2 py-1.5 rounded bg-cyberDark border border-cyberBorder text-xs">
                         </div>
                     </div>
-                    <div id="opt-container-${index}" class="space-y-1.5 ${q.type === 'multi' ? '' : 'hidden'}">
-                        <label class="block text-[10px] text-slate-400 font-bold">Варианты ответа (первый - всегда верный):</label>
-                        <input type="text" placeholder="Верный вариант" value="${q.options[0] || ''}" oninput="updateOption(${index}, 0, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
-                        <input type="text" placeholder="Неверный вариант 1" value="${q.options[1] || ''}" oninput="updateOption(${index}, 1, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
-                        <input type="text" placeholder="Неверный вариант 2" value="${q.options[2] || ''}" oninput="updateOption(${index}, 2, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
-                    </div>
-                    ${q.type === 'input' ? `
-                    <div>
-                        <label class="block text-[10px] text-slate-300 mb-1">Правильный текстовый ответ</label>
-                        <input type="text" value="${q.options[0] || ''}" oninput="updateOption(${index}, 0, this.value)" class="w-full px-2 py-1 rounded bg-cyberDark border border-cyberBorder text-xs">
-                    </div>
-                    ` : ''}
+                    ${optionsHtml}
                 `;
                 container.appendChild(card);
             });
             
-            // Рендер формул через KaTeX
-            try {
-                renderMathInElement(container, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false}
-                    ]
-                });
-            } catch(e) {}
-
+            renderMath(container);
             updateConfig();
         }
 
@@ -776,7 +813,7 @@
 
         function updateQuestionType(index, type) {
             project.questions[index].type = type;
-            if (type === 'multi' && project.questions[index].options.length < 3) {
+            if (type === 'multi') {
                 project.questions[index].options = ["Верный ответ", "Неверный вариант А", "Неверный вариант Б"];
                 project.questions[index].correctAnswer = 0;
             } else if (type === 'single') {
@@ -857,22 +894,10 @@
             const qTextEl = document.getElementById('prev-question-text');
             qTextEl.innerText = q.text;
 
-            // Отрисовка KaTeX в вопросе
-            try {
-                renderMathInElement(qTextEl, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false}
-                    ]
-                });
-            } catch(e){}
+            renderMath(qTextEl);
 
             // Режим стресса подозреваемого (на полиграфе)
-            if (q.isLie) {
-                setStress(true);
-            } else {
-                setStress(false);
-            }
+            setStress(q.isLie);
 
             // Рендеринг кнопок ответов в зависимости от типа задания
             const zone = document.getElementById('prev-answers-zone');
@@ -893,13 +918,12 @@
                     </div>
                 `;
             } else if (q.type === 'multi') {
-                // Перемешиваем массив индексов
                 const indices = q.options.map((_, i) => i).sort(() => Math.random() - 0.5);
                 let html = `<div class="grid grid-cols-1 gap-2">`;
                 indices.forEach(idx => {
                     html += `
                         <button onclick="submitMultiAnswer(${idx})" class="p-2 rounded-lg bg-cyberDark hover:bg-slate-900 border border-cyberBorder text-xs text-left transition-all text-slate-200">
-                            ${q.options[idx]}
+                            ${safeAttr(q.options[idx])}
                         </button>
                     `;
                 });
@@ -945,7 +969,6 @@
             }
         }
 
-        // Обработка логики детектора лжи и стресса
         function setStress(active) {
             isStressActive = active;
             const stressIndicator = document.getElementById('prev-stress-indicator');
@@ -968,7 +991,6 @@
             applyPenalty("Время истекло!");
         }
 
-        // Да/Нет Ответ
         function submitAnswer(userGuessedLie) {
             if (!gameplay.canAnswer) return;
             if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
@@ -981,20 +1003,18 @@
             }
         }
 
-        // Множественный Выбор
         function submitMultiAnswer(chosenIndex) {
             if (!gameplay.canAnswer) return;
             if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
 
             const q = project.questions[gameplay.currentIdx];
-            if (chosenIndex === 0) { // Первым в конструкторе пишется правильный
+            if (chosenIndex === 0) {
                 showFeedback(true, q.explanation);
             } else {
                 applyPenalty("Неверно выбранный аргумент!");
             }
         }
 
-        // Ввод Ответа
         function submitInputAnswer() {
             if (!gameplay.canAnswer) return;
             if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
@@ -1010,7 +1030,6 @@
             }
         }
 
-        // Показ Устного Ответа
         function revealOralAnswer() {
             if (!gameplay.canAnswer) return;
             if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
@@ -1018,7 +1037,6 @@
             showFeedback(true, q.explanation);
         }
 
-        // Показ обратной связи после ответа
         function showFeedback(isCorrect, explanation) {
             gameplay.canAnswer = false;
             const t = translations[project.lang];
@@ -1037,6 +1055,8 @@
                     <p>${explanation || 'Без комментариев.'}</p>
                 </div>
             `;
+            
+            renderMath(zone);
 
             setTimeout(() => {
                 gameplay.currentIdx++;
@@ -1044,14 +1064,12 @@
             }, project.delay * 1000);
         }
 
-        // Наказание / Ошибка
         function applyPenalty(reason) {
             if (project.lives !== 999) {
                 gameplay.lives--;
                 renderHUDLives();
             }
             
-            // Мигание красным экраном
             const qBox = document.getElementById('prev-question-box');
             const originalBorderColor = qBox.style.borderColor;
             qBox.style.borderColor = "#ef4444";
@@ -1068,11 +1086,10 @@
                 }, 1000);
             } else {
                 const q = project.questions[gameplay.currentIdx];
-                showFeedback(false, q.explanation);
+                showFeedback(false, q.explanation || reason);
             }
         }
 
-        // Конец игры
         function endGame(victory) {
             gameplay.active = false;
             if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
@@ -1132,7 +1149,6 @@
                 let amp = isStressActive ? 14 : 4.5;
                 let y = h / 2 + Math.sin((x + polygraphOffset) * freq) * amp;
                 
-                // Рандомные помехи при стрессе
                 if (isStressActive && Math.random() > 0.82) {
                     y += (Math.random() - 0.5) * 16;
                 }
@@ -1144,24 +1160,14 @@
             polygraphOffset += isStressActive ? 10 : 3.5;
         }
 
-        // --- ЭКСПОРТ И ИМПОРТ НАСТРОЕК ПРОЕКТА ---
-        function saveProject() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(project, null, 2));
-            const dl = document.createElement('a');
-            dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", `${project.title.replace(/\s+/g, '_')}_project.json`);
-            document.body.appendChild(dl);
-            dl.click();
-            dl.remove();
-        }
-
         function loadProject(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    project = JSON.parse(e.target.result);
+                    const loaded = JSON.parse(e.target.result);
+                    project = Object.assign({}, project, loaded);
                     
                     // Обновление полей в интерфейсе
                     document.getElementById('cfg-title').value = project.title;
@@ -1233,14 +1239,17 @@
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // Генерация автономного HTML-файла игры
+        // Генерация автономного HTML-файла игры (экранируем обратные кавычки и переменные для корректного экспорта)
         function generateStandaloneHTML() {
+            // Экранируем спецсимволы в вопросах, сохраняя математические формулы
+            const escapedQuestions = JSON.stringify(project.questions).replace(/\\/g, '\\\\');
+
             return `<!DOCTYPE html>
-<html lang="${project.lang}">
+<html lang="\${project.lang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${project.title}</title>
+    <title>\${project.title}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&family=Press+Start+2P&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -1253,8 +1262,8 @@
     <style>
         body {
             background-color: #05070f;
-            color: ${project.colorText};
-            font-family: ${project.font};
+            color: \${project.colorText};
+            font-family: \${project.font};
             min-height: 100vh;
             margin: 0;
             display: flex;
@@ -1276,14 +1285,14 @@
     <div class="relative w-full max-w-4xl rounded-3xl overflow-hidden glass-container flex flex-col justify-between" style="min-height: 580px;">
         
         <!-- Обоина подозреваемого -->
-        <div class="absolute inset-0 bg-cover bg-center -z-10" style="background-image: url('${project.bgImg}');"></div>
+        <div class="absolute inset-0 bg-cover bg-center -z-10" style="background-image: url('\${project.bgImg}');"></div>
         <div class="absolute inset-0 bg-slate-950/80 -z-10"></div>
 
         <!-- 1. Стартовый экран -->
-        <div id="start-screen" class="absolute inset-0 z-40 flex flex-col items-center justify-center p-6 text-center bg-slate-950/95 ${project.titlePage ? '' : 'hidden'}">
-            <h1 class="text-2xl sm:text-3xl font-extrabold font-orbitron mb-2 text-white">${project.title}</h1>
-            <p class="text-sm text-cyan-400 mb-8 font-mono">${project.suspectName} - ${project.suspectRole}</p>
-            <button onclick="beginGame()" class="px-8 py-4 rounded-xl text-white font-orbitron font-bold text-sm tracking-widest transition-all hover:scale-105" style="background: linear-gradient(135deg, ${project.colorPrimary}, ${project.colorAccent});">
+        <div id="start-screen" class="absolute inset-0 z-40 flex flex-col items-center justify-center p-6 text-center bg-slate-950/95 \${project.titlePage ? '' : 'hidden'}">
+            <h1 class="text-2xl sm:text-3xl font-extrabold font-orbitron mb-2 text-white">\${project.title}</h1>
+            <p class="text-sm text-cyan-400 mb-8 font-mono">\${project.suspectName} - \${project.suspectRole}</p>
+            <button onclick="beginGame()" class="px-8 py-4 rounded-xl text-white font-orbitron font-bold text-sm tracking-widest transition-all hover:scale-105" style="background: linear-gradient(135deg, \${project.colorPrimary}, \limits\${project.colorAccent});">
                 НАЧАТЬ ДОПРОС
             </button>
             <p class="absolute bottom-6 text-[10px] text-slate-500 font-mono">Автор: Гальмиз Мария Александровна</p>
@@ -1307,13 +1316,13 @@
             <!-- Аватар -->
             <div class="flex flex-col items-center justify-center w-full md:w-1/3">
                 <div class="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-purple-500/50 shadow-lg mb-3">
-                    <img src="${project.suspectImg}" class="w-full h-full object-cover">
+                    <img src="\${project.suspectImg}" class="w-full h-full object-cover">
                     <div id="stress-overlay" class="absolute inset-0 bg-red-600/30 flex items-center justify-center opacity-0 transition-opacity">
                         <span class="text-[10px] font-orbitron font-extrabold text-white bg-red-600 px-2 py-0.5 rounded tracking-wider">СТРЕСС</span>
                     </div>
                 </div>
-                <h4 class="font-orbitron font-bold text-sm text-white">${project.suspectName}</h4>
-                <span class="text-[10px] text-slate-400 font-mono">${project.suspectRole}</span>
+                <h4 class="font-orbitron font-bold text-sm text-white">\${project.suspectName}</h4>
+                <span class="text-[10px] text-slate-400 font-mono">\${project.suspectRole}</span>
             </div>
 
             <!-- Консоль детектора и Задание -->
@@ -1329,8 +1338,8 @@
                 </div>
 
                 <!-- Вопрос -->
-                <div id="question-box" class="p-5 rounded-2xl border flex flex-col justify-between min-h-[160px]" style="background-color: ${project.colorPanel}; border-color: rgba(168,85,247,0.3);">
-                    <div id="question-text" class="font-semibold leading-relaxed" style="font-size: ${project.fontSize};"></div>
+                <div id="question-box" class="p-5 rounded-2xl border flex flex-col justify-between min-h-[160px]" style="background-color: \${project.colorPanel}; border-color: rgba(168,85,247,0.3);">
+                    <div id="question-text" class="font-semibold leading-relaxed" style="font-size: \${project.fontSize};"></div>
                     <div id="answers-zone" class="space-y-2 mt-4"></div>
                 </div>
 
@@ -1348,17 +1357,17 @@
 
     <script>
         const state = {
-            title: \`${project.title}\`,
-            lang: "${project.lang}",
-            livesMax: ${project.lives},
-            timerMax: ${project.timer},
-            delaySec: ${project.delay},
-            colorPrimary: "${project.colorPrimary}",
-            colorAccent: "${project.colorAccent}",
-            colorPanel: "${project.colorPanel}",
-            colorTruthBtn: "${project.colorTruthBtn}",
-            colorLieBtn: "${project.colorLieBtn}",
-            questions: ${JSON.stringify(project.questions)}
+            title: \`\${project.title}\`,
+            lang: "\${project.lang}",
+            livesMax: \${project.lives},
+            timerMax: \${project.timer},
+            delaySec: \${project.delay},
+            colorPrimary: "\${project.colorPrimary}",
+            colorAccent: "\${project.colorAccent}",
+            colorPanel: "\${project.colorPanel}",
+            colorTruthBtn: "\${project.colorTruthBtn}",
+            colorLieBtn: "\${project.colorLieBtn}",
+            questions: JSON.parse('\${escapedQuestions}')
         };
 
         const t = {
@@ -1383,12 +1392,45 @@
         let polyOffset = 0;
         let isStress = false;
 
+        function safeAttr(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#39;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;');
+        }
+
+        function renderMath(element) {
+            if (typeof renderMathInElement === 'function') {
+                try {
+                    renderMathInElement(element, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ]
+                    });
+                } catch(e) {
+                    console.error(e);
+                }
+            } else {
+                setTimeout(() => renderMath(element), 100);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            if (!${project.titlePage}) {
+            if (!\${project.titlePage}) {
                 beginGame();
             }
             initPolygraph();
-            document.body.style.fontFamily = "${project.font}";
+            document.body.style.fontFamily = "\${project.font}";
+        });
+
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('game-polygraph');
+            if (canvas && canvas.parentElement) {
+                canvas.width = canvas.parentElement.clientWidth;
+            }
         });
 
         function beginGame() {
@@ -1429,15 +1471,7 @@
             const textEl = document.getElementById('question-text');
             textEl.innerText = q.text;
 
-            // Рендер LaTeX формул автономно
-            try {
-                renderMathInElement(textEl, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false}
-                    ]
-                });
-            } catch(e) {}
+            renderMath(textEl);
 
             isStress = q.isLie;
             const overlay = document.getElementById('stress-overlay');
@@ -1473,7 +1507,7 @@
                 indices.forEach(idx => {
                     html += \`
                         <button onclick="submitMulti(\${idx})" class="p-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-purple-500/20 text-xs text-left transition-all text-slate-200">
-                            \${q.options[idx]}
+                            \${safeAttr(q.options[idx])}
                         </button>
                     \`;
                 });
@@ -1565,12 +1599,15 @@
             play.score += 100;
             document.getElementById('hud-score').innerText = \`\${t.score}: \${play.score}\`;
 
-            document.getElementById('answers-zone').innerHTML = \`
+            const zone = document.getElementById('answers-zone');
+            zone.innerHTML = \`
                 <div class="p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs leading-relaxed">
                     <p class="font-bold font-orbitron mb-1"><i class="fa-solid fa-circle-check mr-1"></i> \${t.correct}</p>
                     <p>\${explanation || 'Успешно.'}</p>
                 </div>
             \`;
+            
+            renderMath(zone);
 
             setTimeout(() => {
                 play.currentIdx++;
@@ -1578,7 +1615,7 @@
             }, state.delaySec * 1000);
         }
 
-        function failAnswer() {
+        function failAnswer(reason) {
             if (state.livesMax !== 999) {
                 play.lives--;
                 drawLives();
@@ -1593,12 +1630,17 @@
             } else {
                 const q = state.questions[play.currentIdx];
                 play.canAnswer = false;
-                document.getElementById('answers-zone').innerHTML = \`
+                
+                const zone = document.getElementById('answers-zone');
+                zone.innerHTML = \`
                     <div class="p-4 rounded-xl border border-rose-500/40 bg-rose-500/10 text-rose-300 text-xs leading-relaxed">
                         <p class="font-bold font-orbitron mb-1"><i class="fa-solid fa-circle-xmark mr-1"></i> \${t.wrong}</p>
-                        <p>\${q.explanation || 'Ошибка.'}</p>
+                        <p>\${q.explanation || reason || 'Ошибка.'}</p>
                     </div>
                 \`;
+                
+                renderMath(zone);
+
                 setTimeout(() => {
                     play.currentIdx++;
                     loadQuestion();
