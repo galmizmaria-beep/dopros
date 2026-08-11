@@ -1,1710 +1,314 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор игры «Допрос подозреваемого» | Гальмиз Мария Александровна</title>
-    
-    <!-- Tailwind CSS для стилей -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Иконки FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&family=Press+Start+2P&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- KaTeX для поддержки математических формул -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cyberDark: '#070913',
-                        cyberCard: '#0f1326',
-                        cyberBorder: '#1f2647',
-                        cyberNeon: '#a855f7',
-                        cyberCyan: '#06b6d4',
-                        cyberPink: '#ec4899',
-                        cyberGreen: '#10b981',
-                        cyberRed: '#ef4444'
-                    },
-                    fontFamily: {
-                        orbitron: ['Orbitron', 'sans-serif'],
-                        inter: ['Inter', 'sans-serif'],
-                        playfair: ['Playfair Display', 'serif'],
-                        press: ['"Press Start 2P"', 'monospace'],
-                        mono: ['"Roboto Mono"', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #05070f;
-            color: #f8fafc;
-            font-family: 'Inter', sans-serif;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 45%),
-                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 45%);
-            min-height: 100vh;
-        }
-        .glass-panel {
-            background: rgba(15, 19, 38, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(168, 85, 247, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-        .glass-input {
-            background: rgba(5, 7, 15, 0.7);
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            color: #ffffff;
-            transition: all 0.3s ease;
-        }
-        .glass-input:focus {
-            outline: none;
-            border-color: #a855f7;
-            box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
-        }
-        .neon-glow {
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #05070f;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1f2647;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a855f7;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Interrogation Studio</title>
+<style>
+:root{
+ --bg:#03050d;--panel:#090d1e;--panel2:#0e1330;--line:#242b55;
+ --text:#f7f7ff;--muted:#969bc1;--purple:#9d48ff;--pink:#ef43ef;
+ --green:#31e6a2;--red:#ff4d78;--blue:#4e8cff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 78% 8%,#21105a 0,#080a18 35%,#03050d 80%);color:var(--text);font-family:Inter,Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.topbar{height:70px;display:flex;align-items:center;gap:18px;padding:0 20px;position:sticky;top:0;z-index:50;background:#040610ee;border-bottom:1px solid #1c2244;backdrop-filter:blur(16px)}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#9a3dff,#457fff);display:grid;place-items:center;box-shadow:0 0 28px #7b3fff55}.logo:after{content:"◆";font-size:15px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900}.brand small{display:block;color:#777da5;font-weight:500;font-size:10px}
+.actions{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.btn{border:1px solid #2b315a;background:#0c1027;color:#fff;padding:9px 12px;border-radius:10px;transition:.15s}
+.btn:hover{border-color:#8256ff;transform:translateY(-1px)}.btn.primary{border:0;background:linear-gradient(135deg,#a342ff,#5b39ff);box-shadow:0 8px 25px #7438ff33}.btn.green{background:#0c2b25;border-color:#176c57}
+.status{position:fixed;right:18px;bottom:18px;z-index:100;padding:11px 14px;border-radius:12px;background:#121833;border:1px solid #343d70;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none}.status.show{opacity:1;transform:none}
+.layout{display:grid;grid-template-columns:510px minmax(0,1fr);gap:18px;padding:18px;max-width:1800px;margin:auto}
+.editor{background:#080b1bee;border:1px solid #202750;border-radius:20px;overflow:auto;max-height:calc(100vh - 106px);box-shadow:0 25px 80px #0007}
+.section{padding:17px;border-bottom:1px solid #1b2140}.section h3{margin:0 0 12px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#d9d5ff}.hint{font-size:11px;color:var(--muted);line-height:1.5;margin:6px 0 0}
+.field{margin:9px 0}.field>label{display:block;font-size:11px;color:#bfc3df;margin-bottom:6px}
+input[type=text],input[type=number],input[type=url],select,textarea{width:100%;border:1px solid #252c52;background:#070a1b;color:#fff;border-radius:10px;padding:9px;outline:none}
+textarea{min-height:82px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#8857ff;box-shadow:0 0 0 3px #8757ff13}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.color{width:100%;height:40px;padding:3px;border:1px solid #252c52;background:#070a1b;border-radius:10px}
+.check{display:flex;gap:8px;align-items:center;color:#cdd0e8;font-size:12px;margin:9px 0}.check input{accent-color:#9a45ff;width:17px;height:17px}
+.filebox{display:grid;grid-template-columns:1fr auto;gap:7px}.filelabel{display:block;text-align:center;padding:10px;border:1px dashed #3a416b;background:#070a1b;border-radius:10px;color:#aaaed0}.filelabel input{display:none}
+.asset{width:100%;height:110px;object-fit:cover;background:#070a18;border:1px solid #252c52;border-radius:10px;margin-top:7px}
+.tabs{display:flex;gap:6px;overflow:auto;margin-bottom:10px}.tab{white-space:nowrap;padding:8px 10px;border-radius:9px;border:1px solid #2b3159;background:#090d20;color:#bfc3df}.tab:hover{border-color:#8757ff}
+.questions{max-height:560px;overflow:auto}.qcard{background:#080c1e;border:1px solid #262d54;border-radius:14px;margin:9px 0;padding:12px}.qtop{display:flex;justify-content:space-between;align-items:center;gap:8px}.qtop b{font-size:12px}.mini{padding:7px 9px;background:#10152e;color:#ddd;border:1px solid #2d345d;border-radius:8px}
+.qtext{min-height:92px}.option-editor{margin-top:7px}.option-row{display:grid;grid-template-columns:1fr auto;gap:5px;margin:5px 0}.danger{border-color:#71314c!important;background:#28101d!important}
+.footer{padding:15px;text-align:center;color:#6f759c;font-size:11px}
+.preview{min-width:0}.previewbox{height:calc(100vh - 106px);min-height:650px;position:sticky;top:88px;border:1px solid #202750;border-radius:20px;overflow:hidden;background:#050611;box-shadow:0 25px 90px #0008}.previewbox iframe{width:100%;height:100%;border:0}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}.editor{max-height:none}.previewbox{position:relative;top:auto;height:780px}}
+</style>
 </head>
-<body class="flex flex-col min-h-screen">
-
-    <!-- Шапка конструктора -->
-    <header class="border-b border-cyberBorder bg-cyberDark/90 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyberNeon to-cyberCyan flex items-center justify-center neon-glow">
-                    <i class="fa-solid fa-user-secret text-white text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="font-orbitron font-extrabold text-xl tracking-wider bg-gradient-to-r from-white via-cyberCyan to-cyberNeon bg-clip-text text-transparent">
-                        NEO-DETECTOR
-                    </h1>
-                    <p class="text-xs text-slate-400 font-mono">Конструктор симулятора допроса</p>
-                </div>
-            </div>
-
-            <!-- Верхние кнопки действий -->
-            <div class="flex items-center space-x-2">
-                <button onclick="saveProject()" class="px-3.5 py-2 rounded-xl bg-cyberCard border border-cyberNeon/45 hover:border-cyberNeon text-xs font-semibold font-orbitron text-white transition-all flex items-center space-x-1.5 shadow-lg">
-                    <i class="fa-solid fa-floppy-disk text-cyberCyan"></i>
-                    <span class="hidden sm:inline">Сохранить проект</span>
-                </button>
-                <label class="px-3.5 py-2 rounded-xl bg-cyberCard border border-cyberCyan/45 hover:border-cyberCyan text-xs font-semibold font-orbitron text-white transition-all flex items-center space-x-1.5 cursor-pointer shadow-lg">
-                    <i class="fa-solid fa-folder-open text-cyberNeon"></i>
-                    <span class="hidden sm:inline">Загрузить проект</span>
-                    <input type="file" id="loadProjectFile" accept=".json" class="hidden" onchange="loadProject(event)">
-                </label>
-                <button onclick="exportGenially()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs font-semibold font-orbitron text-white transition-all flex items-center space-x-1.5 shadow-lg neon-glow">
-                    <i class="fa-solid fa-code"></i>
-                    <span class="hidden md:inline">Код для Genially</span>
-                </button>
-                <button onclick="downloadHTML()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-xs font-semibold font-orbitron text-white transition-all flex items-center space-x-1.5 shadow-lg">
-                    <i class="fa-solid fa-download"></i>
-                    <span class="hidden md:inline">Скачать HTML</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Основное рабочее пространство -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        <!-- Левая колонка: Настройки редактора -->
-        <div class="lg:col-span-6 space-y-6">
-            
-            <!-- Табы редактора -->
-            <div class="flex overflow-x-auto space-x-1.5 bg-cyberCard/90 p-1.5 rounded-xl border border-cyberBorder">
-                <button onclick="switchTab('general')" id="tab-btn-general" class="tab-btn px-4 py-2 rounded-lg text-xs font-orbitron font-bold transition-all whitespace-nowrap bg-cyberNeon text-white">
-                    <i class="fa-solid fa-sliders mr-1.5"></i> Общие
-                </button>
-                <button onclick="switchTab('design')" id="tab-btn-design" class="tab-btn px-4 py-2 rounded-lg text-xs font-orbitron font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-palette mr-1.5"></i> Дизайн
-                </button>
-                <button onclick="switchTab('questions')" id="tab-btn-questions" class="tab-btn px-4 py-2 rounded-lg text-xs font-orbitron font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-list-check mr-1.5"></i> Задания (<span id="q-count-badge">0</span>)
-                </button>
-                <button onclick="switchTab('settings')" id="tab-btn-settings" class="tab-btn px-4 py-2 rounded-lg text-xs font-orbitron font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-clock mr-1.5"></i> Настройки игры
-                </button>
-            </div>
-
-            <!-- Вкладка 1: Общие параметры -->
-            <div id="tab-general" class="tab-content space-y-4 glass-panel p-5 rounded-xl">
-                <h3 class="text-sm font-orbitron font-bold text-cyberCyan flex items-center mb-2">
-                    <i class="fa-solid fa-id-card mr-2"></i> Основная информация
-                </h3>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Название игры</label>
-                    <input type="text" id="cfg-title" value="Допрос подозреваемого: Петр I" oninput="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-sm">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Язык интерфейса</label>
-                        <select id="cfg-lang" onchange="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-xs">
-                            <option value="ru" selected>🇷🇺 Русский</option>
-                            <option value="en">🇬🇧 English</option>
-                            <option value="es">🇪🇸 Español</option>
-                            <option value="fr">🇫🇷 Français</option>
-                            <option value="de">🇩🇪 Deutsch</option>
-                        </select>
-                    </div>
-                    <div class="flex items-center justify-between px-3 py-2 bg-cyberDark/60 rounded-lg border border-cyberBorder h-11 mt-6">
-                        <span class="text-xs font-semibold text-slate-300">Титульный лист</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="cfg-title-page" checked onchange="updateConfig()" class="sr-only peer">
-                            <div class="w-9 h-5 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyberNeon"></div>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Имя подозреваемого</label>
-                        <input type="text" id="cfg-suspect-name" value="Император Петр I" oninput="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Роль / Подзаголовок</label>
-                        <input type="text" id="cfg-suspect-role" value="Царь-реформатор (1682–1725)" oninput="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-sm">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Спрайт подозреваемого</label>
-                        <div class="flex space-x-2">
-                            <input type="text" id="cfg-suspect-img" value="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=300" oninput="updateConfig()" class="flex-grow px-3 py-2 rounded-lg glass-input text-xs">
-                            <label class="px-3 py-2 rounded-lg bg-cyberCard border border-cyberNeon/45 hover:border-cyberNeon cursor-pointer text-xs flex items-center justify-center">
-                                <i class="fa-solid fa-upload"></i>
-                                <input type="file" accept="image/*" class="hidden" onchange="uploadImage(event, 'cfg-suspect-img')">
-                            </label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Фон кабинета допроса</label>
-                        <div class="flex space-x-2">
-                            <input type="text" id="cfg-bg-img" value="https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&q=80&w=1000" oninput="updateConfig()" class="flex-grow px-3 py-2 rounded-lg glass-input text-xs">
-                            <label class="px-3 py-2 rounded-lg bg-cyberCard border border-cyberCyan/45 hover:border-cyberCyan cursor-pointer text-xs flex items-center justify-center">
-                                <i class="fa-solid fa-upload"></i>
-                                <input type="file" accept="image/*" class="hidden" onchange="uploadImage(event, 'cfg-bg-img')">
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Вкладка 2: Настройки дизайна (Шрифты, цвета) -->
-            <div id="tab-design" class="tab-content space-y-4 glass-panel p-5 rounded-xl hidden">
-                <h3 class="text-sm font-orbitron font-bold text-cyberPink flex items-center mb-2">
-                    <i class="fa-solid fa-palette mr-2"></i> Стилизация и Цвета
-                </h3>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Шрифт интерфейса</label>
-                        <select id="cfg-font" onchange="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-xs">
-                            <option value="Inter, sans-serif" selected>Inter (Стандартный)</option>
-                            <option value="'Orbitron', sans-serif">Orbitron (Будущее)</option>
-                            <option value="'Playfair Display', serif">Playfair (Классика)</option>
-                            <option value="'Press Start 2P', monospace">Press Start (8-бит)</option>
-                            <option value="'Roboto Mono', monospace">Roboto Mono (Код)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Размер шрифта вопросов/ответов</label>
-                        <select id="cfg-font-size" onchange="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-xs">
-                            <option value="12px">Маленький (12px)</option>
-                            <option value="14px" selected>Средний (14px)</option>
-                            <option value="18px">Крупный (18px)</option>
-                            <option value="22px">Очень крупный (22px)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Основной</label>
-                        <input type="color" id="cfg-color-primary" value="#a855f7" oninput="updateConfig()" class="w-full h-8 rounded bg-transparent cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Акцент</label>
-                        <input type="color" id="cfg-color-accent" value="#06b6d4" oninput="updateConfig()" class="w-full h-8 rounded bg-transparent cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Цвет плашек</label>
-                        <input type="color" id="cfg-color-panel" value="#0f1326" oninput="updateConfig()" class="w-full h-8 rounded bg-transparent cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Цвет текста</label>
-                        <input type="color" id="cfg-color-text" value="#f8fafc" oninput="updateConfig()" class="w-full h-8 rounded bg-transparent cursor-pointer">
-                    </div>
-                </div>
-
-                <!-- Подраздел: кастомизация кнопок -->
-                <div class="p-3.5 bg-cyberDark/60 rounded-xl border border-cyberBorder space-y-3">
-                    <h4 class="text-xs font-orbitron uppercase text-cyberCyan font-bold">Настройка кнопок ответов</h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[10px] text-slate-400 mb-1">Цвет кнопки "Правда"</label>
-                            <input type="color" id="cfg-color-truth-btn" value="#10b981" oninput="updateConfig()" class="w-full h-8 rounded bg-transparent cursor-pointer">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-slate-400 mb-1">Цвет кнопки "Ложь"</label>
-                            <input type="color" id="cfg-color-lie-btn" value="#ef4444" oninput="updateConfig()" class="w-full h-8 rounded bg-transparent cursor-pointer">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Вкладка 3: Конструктор вопросов -->
-            <div id="tab-questions" class="tab-content space-y-4 glass-panel p-5 rounded-xl hidden">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-sm font-orbitron font-bold text-cyberGreen flex items-center">
-                        <i class="fa-solid fa-clipboard-question mr-2"></i> Список заданий
-                    </h3>
-                    <button onclick="addQuestion()" class="px-3 py-1.5 rounded-lg bg-cyberGreen hover:bg-emerald-600 text-slate-950 font-orbitron font-bold text-xs transition-all flex items-center space-x-1 shadow">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Добавить</span>
-                    </button>
-                </div>
-
-                <div id="questions-list" class="space-y-4 max-h-[420px] overflow-y-auto pr-1">
-                    <!-- Задания генерируются здесь через JS -->
-                </div>
-            </div>
-
-            <!-- Вкладка 4: Настройки игрового процесса -->
-            <div id="tab-settings" class="tab-content space-y-4 glass-panel p-5 rounded-xl hidden">
-                <h3 class="text-sm font-orbitron font-bold text-cyberCyan flex items-center mb-2">
-                    <i class="fa-solid fa-gamepad mr-2"></i> Механика и Интервалы
-                </h3>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Количество жизней</label>
-                        <select id="cfg-lives" onchange="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-xs">
-                            <option value="1">1 Жизнь (Хардкор)</option>
-                            <option value="2">2 Жизни</option>
-                            <option value="3" selected>3 Жизни (Стандарт)</option>
-                            <option value="5">5 Жизней (Легко)</option>
-                            <option value="999">Бесконечно (Без смертей)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Таймер на вопрос (сек, 0 - без таймера)</label>
-                        <input type="number" id="cfg-timer" value="15" min="0" max="300" oninput="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-sm">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Задержка показа ответа (сек)</label>
-                        <input type="number" id="cfg-delay" value="4" min="1" max="15" oninput="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Интервал появления вопросов (сек)</label>
-                        <input type="number" id="cfg-interval" value="2" min="0" max="10" oninput="updateConfig()" class="w-full px-3 py-2.5 rounded-lg glass-input text-sm">
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Правая колонка: Интерактивный предпросмотр -->
-        <div class="lg:col-span-6 flex flex-col space-y-4">
-            <div class="flex items-center justify-between bg-cyberCard/90 px-4 py-3 rounded-xl border border-cyberBorder">
-                <div class="flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-cyberRed animate-pulse"></span>
-                    <h3 class="font-orbitron font-bold text-xs tracking-wider text-white">ОКНО ПРЕДПРОСМОТРА ИГРЫ</h3>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button onclick="restartPreview()" class="px-2.5 py-1 rounded-md bg-cyberDark border border-cyberBorder hover:border-cyberNeon text-[10px] font-orbitron text-slate-300 flex items-center space-x-1 transition-all">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>Сброс</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Игровая область предпросмотра -->
-            <div id="preview-screen" class="relative w-full rounded-2xl overflow-hidden border border-cyberBorder bg-cyberDark flex flex-col" style="height: 540px;">
-                
-                <!-- Задний фон с оверлеем -->
-                <div id="prev-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-300" style="background-image: url('https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&q=80&w=1000');"></div>
-                <div class="absolute inset-0 bg-slate-950/75 backdrop-blur-[1px] z-0"></div>
-
-                <!-- 1. Стартовый экран (титульный лист) -->
-                <div id="prev-screen-start" class="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-slate-950/90">
-                    <div class="w-14 h-14 rounded-2xl bg-cyberNeon/20 border border-cyberNeon/50 flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-fingerprint text-cyberCyan text-2xl"></i>
-                    </div>
-                    <h2 id="prev-title" class="text-xl sm:text-2xl font-extrabold font-orbitron mb-1 text-white">Допрос подозреваемого: Петр I</h2>
-                    <p id="prev-role" class="text-xs text-cyan-400 mb-6 font-mono">Царь-реформатор (1682–1725)</p>
-                    
-                    <button onclick="startPreviewGameplay()" id="prev-start-btn" class="px-8 py-3.5 rounded-xl text-white font-orbitron font-bold text-sm tracking-widest shadow-lg transition-all hover:scale-105" style="background: linear-gradient(135deg, #a855f7, #06b6d4);">
-                        НАЧАТЬ ДОПРОС
-                    </button>
-
-                    <div class="mt-8 flex space-x-4 text-[10px] text-slate-400 font-mono bg-cyberDark/60 px-3 py-1.5 rounded-lg border border-cyberBorder">
-                        <span><i class="fa-solid fa-heart text-cyberRed mr-1"></i>Жизни: <span id="prev-start-lives">3</span></span>
-                        <span><i class="fa-solid fa-list text-cyberCyan mr-1"></i>Заданий: <span id="prev-start-qcount">3</span></span>
-                    </div>
-                </div>
-
-                <!-- 2. Игровой HUD (Верхняя панель) -->
-                <div class="relative z-10 p-3 bg-slate-950/80 border-b border-cyberBorder flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div id="prev-hud-lives" class="flex space-x-1 text-xs">
-                            <!-- Сердца генерируются динамически -->
-                        </div>
-                        <span id="prev-hud-score" class="text-[10px] font-mono text-slate-400 bg-cyberDark px-2 py-0.5 rounded">Счет: 0</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div id="prev-hud-timer-container" class="px-2 py-0.5 rounded bg-cyberDark text-[10px] font-mono text-cyan-400 border border-cyberBorder flex items-center space-x-1">
-                            <i class="fa-solid fa-stopwatch text-cyberRed"></i>
-                            <span id="prev-hud-timer">15</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Сцена допроса (Подозреваемый + Детектор) -->
-                <div class="relative z-10 flex-grow flex flex-col md:flex-row items-center justify-between p-4 gap-4 overflow-hidden">
-                    
-                    <!-- Подозреваемый -->
-                    <div class="flex flex-col items-center justify-center w-full md:w-1/3 text-center">
-                        <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden border-2 border-cyberNeon/60 shadow-lg mb-2 bg-slate-900">
-                            <img id="prev-suspect-avatar" src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=300" class="w-full h-full object-cover">
-                            <!-- Индикатор стресса / Детектор -->
-                            <div id="prev-stress-indicator" class="absolute inset-0 bg-red-600/30 flex items-center justify-center opacity-0 transition-opacity">
-                                <span class="text-[9px] font-orbitron font-extrabold text-white bg-red-600 px-1 py-0.5 rounded tracking-wider">СТРЕСС</span>
-                            </div>
-                        </div>
-                        <h4 id="prev-suspect-name" class="font-orbitron font-bold text-xs text-white">Император Петр I</h4>
-                        <span id="label-suspect-role" class="text-[10px] text-slate-400 font-mono">Подозреваемый</span>
-                    </div>
-
-                    <!-- Панель приборов детектора лжи и карточка задания -->
-                    <div class="w-full md:w-2/3 flex flex-col space-y-3">
-                        
-                        <!-- Кардиограмма датчиков -->
-                        <div class="p-2.5 rounded-lg bg-slate-950/90 border border-cyberBorder flex flex-col space-y-1">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[9px] font-orbitron text-slate-400 uppercase tracking-widest flex items-center">
-                                    <i class="fa-solid fa-wave-square text-cyberCyan mr-1"></i> Полиграф
-                                </span>
-                                <span id="prev-heart-rate" class="text-[10px] font-mono text-cyberGreen font-bold">78 BPM</span>
-                            </div>
-                            <canvas id="polygraph-canvas" height="36" class="w-full rounded bg-slate-900/60"></canvas>
-                        </div>
-
-                        <!-- Окно вопроса / утверждения -->
-                        <div id="prev-question-box" class="p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between min-h-[140px]" style="background-color: #0f1326; border-color: rgba(168,85,247,0.3);">
-                            
-                            <!-- Текст вопроса (поддержка математического рендеринга) -->
-                            <div id="prev-question-text" class="font-semibold text-white mb-3" style="font-size: 14px;">
-                                Нажмите «Начать допрос» для запуска теста.
-                            </div>
-
-                            <!-- Зона ответов (Варианты генерируются динамически) -->
-                            <div id="prev-answers-zone" class="space-y-2">
-                                <!-- Варианты ответов или поле ввода -->
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- Водяной знак автора -->
-                <div class="relative z-10 py-1.5 px-4 bg-slate-950 border-t border-cyberBorder/60 text-center text-[9px] text-slate-400 font-mono">
-                    Автор: Гальмиз Мария Александровна
-                </div>
-
-            </div>
-
-        </div>
-
-    </main>
-
-    <!-- Подвал конструктора -->
-    <footer class="border-t border-cyberBorder bg-cyberDark py-4 text-center text-xs text-slate-500 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between">
-            <p>Конструктор интерактивных образовательных игр &copy; 2026</p>
-            <p class="font-orbitron font-semibold text-cyberCyan">Автор: Гальмиз Мария Александровна</p>
-        </div>
-    </footer>
-
-    <!-- Логика приложения -->
-    <script>
-        // Глобальный стейт проекта
-        let project = {
-            title: "Допрос подозреваемого: Петр I",
-            lang: "ru",
-            titlePage: true,
-            suspectName: "Император Петр I",
-            suspectRole: "Царь-реформатор (1682–1725)",
-            suspectImg: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=300",
-            bgImg: "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&q=80&w=1000",
-            font: "Inter, sans-serif",
-            fontSize: "14px",
-            colorPrimary: "#a855f7",
-            colorAccent: "#06b6d4",
-            colorPanel: "#0f1326",
-            colorText: "#f8fafc",
-            colorTruthBtn: "#10b981",
-            colorLieBtn: "#ef4444",
-            lives: 3,
-            timer: 15,
-            delay: 4,
-            interval: 2,
-            questions: [
-                {
-                    id: 1,
-                    text: "Я перенес столицу государства в Санкт-Петербург в $\\mathbf{1703}$ году?",
-                    type: "single", // single, multi, oral, input
-                    isLie: true,
-                    options: ["Правда", "Ложь"],
-                    correctAnswer: 1, // Ложь
-                    explanation: "Ложь! Санкт-Петербург был основан в 1703 году, но столица была перенесена только в 1712 году."
-                },
-                {
-                    id: 2,
-                    text: "Я лично построил первый русский пароход?",
-                    type: "single",
-                    isLie: true,
-                    options: ["Правда", "Ложь"],
-                    correctAnswer: 1, // Ложь
-                    explanation: "Ложь! Первый пароход в России («Елизавета») был построен Карлом Бердом в 1815 году."
-                },
-                {
-                    id: 3,
-                    text: "Я ввел специальный налог на ношение бороды бояр?",
-                    type: "single",
-                    isLie: false,
-                    options: ["Правда", "Ложь"],
-                    correctAnswer: 0, // Правда
-                    explanation: "Верно! Налог на бороду был учрежден для ускорения модернизации быта в стране."
-                }
-            ]
-        };
-
-        // Словарь переводов для кнопок игры
-        const translations = {
-            ru: {
-                start: "НАЧАТЬ ДОПРОС",
-                truth: "ПРАВДА",
-                lie: "ЛОЖЬ!",
-                lives: "Жизни",
-                score: "Счет",
-                timer: "Время",
-                correct: "Верно!",
-                wrong: "Ошибка!",
-                suspect: "Подозреваемый",
-                next: "Следующий вопрос",
-                complete: "Допрос завершен!",
-                restart: "Начать заново",
-                enterAnswer: "Введите ответ...",
-                submit: "Отправить"
-            },
-            en: {
-                start: "START INTERROGATION",
-                truth: "TRUTH",
-                lie: "LIE!",
-                lives: "Lives",
-                score: "Score",
-                timer: "Time",
-                correct: "Correct!",
-                wrong: "Wrong!",
-                suspect: "Suspect",
-                next: "Next Statement",
-                complete: "Interrogation Completed!",
-                restart: "Restart Game",
-                enterAnswer: "Enter answer...",
-                submit: "Submit"
-            },
-            es: {
-                start: "INICIAR INTERROGATORIO",
-                truth: "VERDAD",
-                lie: "¡MENTIRA!",
-                lives: "Vidas",
-                score: "Puntuación",
-                timer: "Tiempo",
-                correct: "¡Correcto!",
-                wrong: "¡Incorrecto!",
-                suspect: "Sospechoso",
-                next: "Siguiente declaración",
-                complete: "¡Interrogatorio completado!",
-                restart: "Reiniciar",
-                enterAnswer: "Escriba su respuesta...",
-                submit: "Enviar"
-            },
-            fr: {
-                start: "COMMENCER L'INTERROGATOIRE",
-                truth: "VÉRITÉ",
-                lie: "MENSONGE!",
-                lives: "Vies",
-                score: "Score",
-                timer: "Temps",
-                correct: "Correct!",
-                wrong: "Erreur!",
-                suspect: "Suspect",
-                next: "Question suivante",
-                complete: "Interrogatoire terminé!",
-                restart: "Recommencer",
-                enterAnswer: "Saisissez votre réponse...",
-                submit: "Valider"
-            },
-            de: {
-                start: "VERHÖR STARTEN",
-                truth: "WAHRHEIT",
-                lie: "LÜGE!",
-                lives: "Leben",
-                score: "Punkte",
-                timer: "Zeit",
-                correct: "Richtig!",
-                wrong: "Falsch!",
-                suspect: "Verdächtiger",
-                next: "Nächste Frage",
-                complete: "Verhör abgeschlossen!",
-                restart: "Neustart",
-                enterAnswer: "Antwort eingeben...",
-                submit: "Senden"
-            }
-        };
-
-        // Состояние геймплея в превью
-        let gameplay = {
-            active: false,
-            currentIdx: 0,
-            score: 0,
-            lives: 3,
-            timerVal: 15,
-            timerInterval: null,
-            canAnswer: true
-        };
-
-        // Анимация полиграфа
-        let polygraphCtx = null;
-        let polygraphOffset = 0;
-        let isStressActive = false;
-
-        // Безопасное экранирование строк для атрибутов HTML
-        function safeAttr(str) {
-            if (!str) return '';
-            return str.replace(/&/g, '&amp;')
-                      .replace(/"/g, '&quot;')
-                      .replace(/'/g, '&#39;')
-                      .replace(/</g, '&lt;')
-                      .replace(/>/g, '&gt;');
-        }
-
-        // Функция для вызова KaTeX с проверкой готовности библиотеки
-        function renderMath(element) {
-            if (typeof renderMathInElement === 'function') {
-                try {
-                    renderMathInElement(element, {
-                        delimiters: [
-                            {left: '$$', right: '$$', display: true},
-                            {left: '$', right: '$', display: false}
-                        ]
-                    });
-                } catch(e) {
-                    console.error("Ошибка KaTeX:", e);
-                }
-            } else {
-                setTimeout(() => renderMath(element), 100);
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderQuestions();
-            updateConfig();
-            initPolygraph();
-        });
-
-        // Отслеживание размера экрана для адаптации полиграфа
-        window.addEventListener('resize', () => {
-            const canvas = document.getElementById('polygraph-canvas');
-            if (canvas && canvas.parentElement) {
-                canvas.width = canvas.parentElement.clientWidth;
-            }
-        });
-
-        // Переключение вкладок в редакторе
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-cyberNeon', 'text-white');
-                btn.classList.add('text-slate-400', 'hover:text-white');
-            });
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-            activeBtn.classList.add('bg-cyberNeon', 'text-white');
-            activeBtn.classList.remove('text-slate-400');
-        }
-
-        // Обновление конфигурации и синхронизация с окном превью
-        function updateConfig() {
-            project.title = document.getElementById('cfg-title').value;
-            project.lang = document.getElementById('cfg-lang').value;
-            project.titlePage = document.getElementById('cfg-title-page').checked;
-            project.suspectName = document.getElementById('cfg-suspect-name').value;
-            project.suspectRole = document.getElementById('cfg-suspect-role').value;
-            project.suspectImg = document.getElementById('cfg-suspect-img').value;
-            project.bgImg = document.getElementById('cfg-bg-img').value;
-            project.font = document.getElementById('cfg-font').value;
-            project.fontSize = document.getElementById('cfg-font-size').value;
-            project.colorPrimary = document.getElementById('cfg-color-primary').value;
-            project.colorAccent = document.getElementById('cfg-color-accent').value;
-            project.colorPanel = document.getElementById('cfg-color-panel').value;
-            project.colorText = document.getElementById('cfg-color-text').value;
-            project.colorTruthBtn = document.getElementById('cfg-color-truth-btn').value;
-            project.colorLieBtn = document.getElementById('cfg-color-lie-btn').value;
-            project.lives = parseInt(document.getElementById('cfg-lives').value);
-            project.timer = parseInt(document.getElementById('cfg-timer').value);
-            project.delay = parseInt(document.getElementById('cfg-delay').value);
-            project.interval = parseInt(document.getElementById('cfg-interval').value);
-
-            // Синхронизация текстов превью
-            document.getElementById('prev-title').innerText = project.title;
-            document.getElementById('prev-role').innerText = project.suspectRole;
-            document.getElementById('prev-suspect-name').innerText = project.suspectName;
-            document.getElementById('prev-suspect-avatar').src = project.suspectImg;
-            document.getElementById('prev-bg').style.backgroundImage = `url('${project.bgImg}')`;
-            document.getElementById('prev-start-lives').innerText = project.lives === 999 ? "∞" : project.lives;
-            document.getElementById('prev-start-qcount').innerText = project.questions.length;
-            document.getElementById('q-count-badge').innerText = project.questions.length;
-            
-            // Локализация кнопок
-            const t = translations[project.lang];
-            document.getElementById('prev-start-btn').innerText = t.start;
-            document.getElementById('label-suspect-role').innerText = t.suspect;
-
-            // Стилизация превью
-            const previewScreen = document.getElementById('preview-screen');
-            previewScreen.style.fontFamily = project.font;
-            previewScreen.style.color = project.colorText;
-
-            const qBox = document.getElementById('prev-question-box');
-            qBox.style.backgroundColor = project.colorPanel;
-            qBox.style.fontSize = project.fontSize;
-
-            // Видимость стартового экрана
-            const startScreen = document.getElementById('prev-screen-start');
-            if (project.titlePage && !gameplay.active) {
-                startScreen.classList.remove('hidden');
-            } else {
-                startScreen.classList.add('hidden');
-            }
-        }
-
-        // Загрузка локального изображения (Base64)
-        function uploadImage(event, targetInputId) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById(targetInputId).value = e.target.result;
-                    updateConfig();
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Рендеринг списка заданий в редакторе
-        function renderQuestions() {
-            const container = document.getElementById('questions-list');
-            container.innerHTML = '';
-
-            project.questions.forEach((q, index) => {
-                const card = document.createElement('div');
-                card.className = "p-4 rounded-xl bg-cyberCard border border-cyberBorder space-y-3 relative";
-                
-                let optionsHtml = '';
-                if (q.type === 'multi') {
-                    optionsHtml = `
-                        <div id="opt-container-${index}" class="space-y-1.5">
-                            <label class="block text-[10px] text-slate-400 font-bold">Варианты ответа (первый - всегда верный):</label>
-                            <input type="text" placeholder="Верный вариант" value="${safeAttr(q.options[0])}" oninput="updateOption(${index}, 0, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
-                            <input type="text" placeholder="Неверный вариант 1" value="${safeAttr(q.options[1])}" oninput="updateOption(${index}, 1, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
-                            <input type="text" placeholder="Неверный вариант 2" value="${safeAttr(q.options[2])}" oninput="updateOption(${index}, 2, this.value)" class="w-full px-2 py-1 rounded bg-slate-900 border border-cyberBorder text-[10px]">
-                        </div>
-                    `;
-                } else if (q.type === 'input') {
-                    optionsHtml = `
-                        <div>
-                            <label class="block text-[10px] text-slate-300 mb-1">Правильный текстовый ответ</label>
-                            <input type="text" value="${safeAttr(q.options[0])}" oninput="updateOption(${index}, 0, this.value)" class="w-full px-2 py-1 rounded bg-cyberDark border border-cyberBorder text-xs">
-                        </div>
-                    `;
-                }
-
-                card.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-orbitron font-bold text-cyberCyan">Утверждение #${index + 1}</span>
-                        <div class="flex items-center space-x-2">
-                            <select onchange="updateQuestionField(${index}, 'isLie', this.value === 'true')" class="px-2 py-1 rounded bg-cyberDark border border-cyberBorder text-[10px] ${q.isLie ? 'text-rose-400' : 'text-emerald-400'}">
-                                <option value="false" ${!q.isLie ? 'selected' : ''}>Правда</option>
-                                <option value="true" ${q.isLie ? 'selected' : ''}>Ложь</option>
-                            </select>
-                            <button onclick="deleteQuestion(${index})" class="text-slate-400 hover:text-rose-400 text-xs px-1">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-300 mb-1">Утверждение подозреваемого (поддерживает $\\mathbf{E=mc^2}$)</label>
-                        <textarea oninput="updateQuestionField(${index}, 'text', this.value)" class="w-full px-2 py-1.5 rounded bg-cyberDark border border-cyberBorder text-xs" rows="2">${safeAttr(q.text)}</textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-slate-300 mb-1">Тип задания</label>
-                            <select onchange="updateQuestionType(${index}, this.value)" class="w-full px-2 py-1.5 rounded bg-cyberDark border border-cyberBorder text-[10px]">
-                                <option value="single" ${q.type === 'single' ? 'selected' : ''}>Да/Нет (Правда/Ложь)</option>
-                                <option value="multi" ${q.type === 'multi' ? 'selected' : ''}>Выбор из вариантов</option>
-                                <option value="input" ${q.type === 'input' ? 'selected' : ''}>Ввод ответа учеником</option>
-                                <option value="oral" ${q.type === 'oral' ? 'selected' : ''}>Устный ответ</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-slate-300 mb-1">Опровержение лжи / Объяснение</label>
-                            <input type="text" value="${safeAttr(q.explanation)}" oninput="updateQuestionField(${index}, 'explanation', this.value)" class="w-full px-2 py-1.5 rounded bg-cyberDark border border-cyberBorder text-xs">
-                        </div>
-                    </div>
-                    ${optionsHtml}
-                `;
-                container.appendChild(card);
-            });
-            
-            renderMath(container);
-            updateConfig();
-        }
-
-        // Обновление полей задания
-        function updateQuestionField(index, field, value) {
-            project.questions[index][field] = value;
-            updateConfig();
-        }
-
-        function updateQuestionType(index, type) {
-            project.questions[index].type = type;
-            if (type === 'multi') {
-                project.questions[index].options = ["Верный ответ", "Неверный вариант А", "Неверный вариант Б"];
-                project.questions[index].correctAnswer = 0;
-            } else if (type === 'single') {
-                project.questions[index].options = ["Правда", "Ложь"];
-                project.questions[index].correctAnswer = project.questions[index].isLie ? 1 : 0;
-            } else if (type === 'input') {
-                project.questions[index].options = ["Ответ"];
-                project.questions[index].correctAnswer = 0;
-            }
-            renderQuestions();
-        }
-
-        function updateOption(qIndex, optIndex, value) {
-            project.questions[qIndex].options[optIndex] = value;
-            updateConfig();
-        }
-
-        function addQuestion() {
-            project.questions.push({
-                id: Date.now(),
-                text: "Новое утверждение подозреваемого?",
-                type: "single",
-                isLie: false,
-                options: ["Правда", "Ложь"],
-                correctAnswer: 0,
-                explanation: "Подробное объяснение факта."
-            });
-            renderQuestions();
-        }
-
-        function deleteQuestion(index) {
-            project.questions.splice(index, 1);
-            renderQuestions();
-        }
-
-        // --- ЛОГИКА ИГРЫ В ПРЕДПРОСМОТРЕ ---
-        function startPreviewGameplay() {
-            if (project.questions.length === 0) {
-                alert("Добавьте хотя бы один вопрос!");
-                return;
-            }
-            gameplay.active = true;
-            gameplay.currentIdx = 0;
-            gameplay.score = 0;
-            gameplay.lives = project.lives;
-            gameplay.canAnswer = true;
-            
-            document.getElementById('prev-screen-start').classList.add('hidden');
-            document.getElementById('prev-hud-score').innerText = `${translations[project.lang].score}: 0`;
-            
-            renderHUDLives();
-            loadPreviewQuestion();
-        }
-
-        function renderHUDLives() {
-            const container = document.getElementById('prev-hud-lives');
-            container.innerHTML = '';
-            if (project.lives === 999) {
-                container.innerHTML = `<span class="text-rose-500"><i class="fa-solid fa-infinity"></i></span>`;
-                return;
-            }
-            for (let i = 0; i < project.lives; i++) {
-                if (i < gameplay.lives) {
-                    container.innerHTML += `<i class="fa-solid fa-heart text-cyberRed"></i>`;
-                } else {
-                    container.innerHTML += `<i class="fa-solid fa-heart text-slate-700"></i>`;
-                }
-            }
-        }
-
-        function loadPreviewQuestion() {
-            if (gameplay.currentIdx >= project.questions.length) {
-                endGame(true);
-                return;
-            }
-
-            const q = project.questions[gameplay.currentIdx];
-            const qTextEl = document.getElementById('prev-question-text');
-            qTextEl.innerText = q.text;
-
-            renderMath(qTextEl);
-
-            // Режим стресса подозреваемого (на полиграфе)
-            setStress(q.isLie);
-
-            // Рендеринг кнопок ответов в зависимости от типа задания
-            const zone = document.getElementById('prev-answers-zone');
-            zone.innerHTML = '';
-            gameplay.canAnswer = true;
-
-            const t = translations[project.lang];
-
-            if (q.type === 'single') {
-                zone.innerHTML = `
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="submitAnswer(false)" class="p-2.5 rounded-lg text-white font-orbitron font-bold text-xs shadow-md transition-all hover:brightness-110" style="background-color: ${project.colorTruthBtn};">
-                            ${t.truth}
-                        </button>
-                        <button onclick="submitAnswer(true)" class="p-2.5 rounded-lg text-white font-orbitron font-bold text-xs shadow-md transition-all hover:brightness-110" style="background-color: ${project.colorLieBtn};">
-                            ${t.lie}
-                        </button>
-                    </div>
-                `;
-            } else if (q.type === 'multi') {
-                const indices = q.options.map((_, i) => i).sort(() => Math.random() - 0.5);
-                let html = `<div class="grid grid-cols-1 gap-2">`;
-                indices.forEach(idx => {
-                    html += `
-                        <button onclick="submitMultiAnswer(${idx})" class="p-2 rounded-lg bg-cyberDark hover:bg-slate-900 border border-cyberBorder text-xs text-left transition-all text-slate-200">
-                            ${safeAttr(q.options[idx])}
-                        </button>
-                    `;
-                });
-                html += `</div>`;
-                zone.innerHTML = html;
-            } else if (q.type === 'input') {
-                zone.innerHTML = `
-                    <div class="flex space-x-2">
-                        <input type="text" id="prev-typed-val" placeholder="${t.enterAnswer}" class="flex-grow p-2 rounded-lg bg-cyberDark border border-cyberBorder text-xs text-white">
-                        <button onclick="submitInputAnswer()" class="px-4 py-2 rounded-lg bg-cyberNeon hover:bg-purple-600 text-white font-orbitron text-xs font-bold transition-all">
-                            ${t.submit}
-                        </button>
-                    </div>
-                `;
-            } else if (q.type === 'oral') {
-                zone.innerHTML = `
-                    <div class="space-y-2">
-                        <p class="text-[10px] text-yellow-400 font-mono"><i class="fa-solid fa-circle-exclamation mr-1"></i> Задание для устного ответа. Сверьтесь с ответом перед продолжением.</p>
-                        <button onclick="revealOralAnswer()" class="w-full p-2.5 rounded-lg bg-cyberNeon/20 border border-cyberNeon/60 hover:bg-cyberNeon/30 text-white font-bold text-xs text-center transition-all">
-                            Показать ответ подозреваемого
-                        </button>
-                    </div>
-                `;
-            }
-
-            // Сброс и запуск таймера
-            if (project.timer > 0) {
-                document.getElementById('prev-hud-timer-container').classList.remove('hidden');
-                gameplay.timerVal = project.timer;
-                document.getElementById('prev-hud-timer').innerText = gameplay.timerVal;
-                
-                if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
-                gameplay.timerInterval = setInterval(() => {
-                    gameplay.timerVal--;
-                    document.getElementById('prev-hud-timer').innerText = gameplay.timerVal;
-                    if (gameplay.timerVal <= 0) {
-                        clearInterval(gameplay.timerInterval);
-                        onTimeOut();
-                    }
-                }, 1000);
-            } else {
-                document.getElementById('prev-hud-timer-container').classList.add('hidden');
-            }
-        }
-
-        function setStress(active) {
-            isStressActive = active;
-            const stressIndicator = document.getElementById('prev-stress-indicator');
-            const hr = document.getElementById('prev-heart-rate');
-            if (active) {
-                stressIndicator.classList.remove('opacity-0');
-                stressIndicator.classList.add('opacity-100');
-                hr.innerText = "136 BPM (СТРЕСС)";
-                hr.className = "text-[10px] font-mono text-cyberRed font-bold animate-pulse";
-            } else {
-                stressIndicator.classList.remove('opacity-100');
-                stressIndicator.classList.add('opacity-0');
-                hr.innerText = "74 BPM";
-                hr.className = "text-[10px] font-mono text-cyberGreen font-bold";
-            }
-        }
-
-        function onTimeOut() {
-            if (!gameplay.canAnswer) return;
-            applyPenalty("Время истекло!");
-        }
-
-        function submitAnswer(userGuessedLie) {
-            if (!gameplay.canAnswer) return;
-            if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
-            
-            const q = project.questions[gameplay.currentIdx];
-            if (userGuessedLie === q.isLie) {
-                showFeedback(true, q.explanation);
-            } else {
-                applyPenalty("Неверный вердикт детектора!");
-            }
-        }
-
-        function submitMultiAnswer(chosenIndex) {
-            if (!gameplay.canAnswer) return;
-            if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
-
-            const q = project.questions[gameplay.currentIdx];
-            if (chosenIndex === 0) {
-                showFeedback(true, q.explanation);
-            } else {
-                applyPenalty("Неверно выбранный аргумент!");
-            }
-        }
-
-        function submitInputAnswer() {
-            if (!gameplay.canAnswer) return;
-            if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
-
-            const val = document.getElementById('prev-typed-val').value.trim().toLowerCase();
-            const q = project.questions[gameplay.currentIdx];
-            const correctVal = q.options[0].trim().toLowerCase();
-
-            if (val === correctVal) {
-                showFeedback(true, q.explanation);
-            } else {
-                applyPenalty(`Неправильный ответ! Ожидалось: ${q.options[0]}`);
-            }
-        }
-
-        function revealOralAnswer() {
-            if (!gameplay.canAnswer) return;
-            if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
-            const q = project.questions[gameplay.currentIdx];
-            showFeedback(true, q.explanation);
-        }
-
-        function showFeedback(isCorrect, explanation) {
-            gameplay.canAnswer = false;
-            const t = translations[project.lang];
-            
-            if (isCorrect) {
-                gameplay.score += 100;
-                document.getElementById('prev-hud-score').innerText = `${t.score}: ${gameplay.score}`;
-            }
-
-            const zone = document.getElementById('prev-answers-zone');
-            zone.innerHTML = `
-                <div class="p-3.5 rounded-lg border text-xs leading-relaxed ${isCorrect ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-rose-500/40 bg-rose-500/10 text-rose-300'}">
-                    <p class="font-bold font-orbitron text-xs mb-1">
-                        ${isCorrect ? `<i class="fa-solid fa-circle-check mr-1"></i> ${t.correct}` : `<i class="fa-solid fa-circle-xmark mr-1"></i> ${t.wrong}`}
-                    </p>
-                    <p>${explanation || 'Без комментариев.'}</p>
-                </div>
-            `;
-            
-            renderMath(zone);
-
-            setTimeout(() => {
-                gameplay.currentIdx++;
-                loadPreviewQuestion();
-            }, project.delay * 1000);
-        }
-
-        function applyPenalty(reason) {
-            if (project.lives !== 999) {
-                gameplay.lives--;
-                renderHUDLives();
-            }
-            
-            const qBox = document.getElementById('prev-question-box');
-            const originalBorderColor = qBox.style.borderColor;
-            qBox.style.borderColor = "#ef4444";
-            qBox.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.4)";
-            
-            setTimeout(() => {
-                qBox.style.borderColor = originalBorderColor;
-                qBox.style.boxShadow = "none";
-            }, 600);
-
-            if (gameplay.lives <= 0 && project.lives !== 999) {
-                setTimeout(() => {
-                    endGame(false);
-                }, 1000);
-            } else {
-                const q = project.questions[gameplay.currentIdx];
-                showFeedback(false, q.explanation || reason);
-            }
-        }
-
-        function endGame(victory) {
-            gameplay.active = false;
-            if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
-            
-            const t = translations[project.lang];
-            const zone = document.getElementById('prev-answers-zone');
-            zone.innerHTML = '';
-
-            const statusTitle = victory ? "Подозреваемый сознался!" : "Миссия провалена!";
-            const statusColor = victory ? "text-emerald-400" : "text-rose-500";
-
-            document.getElementById('prev-question-text').innerHTML = `
-                <div class="text-center space-y-3">
-                    <p class="text-lg font-bold font-orbitron ${statusColor}">${statusTitle}</p>
-                    <p class="text-xs text-slate-400">Финальный счет: ${gameplay.score} очков</p>
-                    <button onclick="startPreviewGameplay()" class="px-5 py-2.5 rounded-lg bg-cyberNeon text-white font-orbitron font-bold text-xs shadow-md transition-all">
-                        ${t.restart}
-                    </button>
-                </div>
-            `;
-        }
-
-        function restartPreview() {
-            gameplay.active = false;
-            if (gameplay.timerInterval) clearInterval(gameplay.timerInterval);
-            updateConfig();
-        }
-
-        // Анимация Детектора лжи (Canvas)
-        function initPolygraph() {
-            const canvas = document.getElementById('polygraph-canvas');
-            if (!canvas) return;
-            polygraphCtx = canvas.getContext('2d');
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = 36;
-
-            setInterval(() => {
-                drawPolygraphFrame();
-            }, 45);
-        }
-
-        function drawPolygraphFrame() {
-            if (!polygraphCtx) return;
-            const canvas = document.getElementById('polygraph-canvas');
-            const w = canvas.width;
-            const h = canvas.height;
-
-            polygraphCtx.fillStyle = "rgba(10, 12, 22, 0.25)";
-            polygraphCtx.fillRect(0, 0, w, h);
-
-            polygraphCtx.beginPath();
-            polygraphCtx.lineWidth = 1.5;
-            polygraphCtx.strokeStyle = isStressActive ? project.colorLieBtn : project.colorAccent;
-
-            for (let x = 0; x < w; x++) {
-                let freq = isStressActive ? 0.08 : 0.035;
-                let amp = isStressActive ? 14 : 4.5;
-                let y = h / 2 + Math.sin((x + polygraphOffset) * freq) * amp;
-                
-                if (isStressActive && Math.random() > 0.82) {
-                    y += (Math.random() - 0.5) * 16;
-                }
-                
-                if (x === 0) polygraphCtx.moveTo(x, y);
-                else polygraphCtx.lineTo(x, y);
-            }
-            polygraphCtx.stroke();
-            polygraphOffset += isStressActive ? 10 : 3.5;
-        }
-
-        function loadProject(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const loaded = JSON.parse(e.target.result);
-                    project = Object.assign({}, project, loaded);
-                    
-                    // Обновление полей в интерфейсе
-                    document.getElementById('cfg-title').value = project.title;
-                    document.getElementById('cfg-lang').value = project.lang;
-                    document.getElementById('cfg-title-page').checked = project.titlePage;
-                    document.getElementById('cfg-suspect-name').value = project.suspectName;
-                    document.getElementById('cfg-suspect-role').value = project.suspectRole;
-                    document.getElementById('cfg-suspect-img').value = project.suspectImg;
-                    document.getElementById('cfg-bg-img').value = project.bgImg;
-                    document.getElementById('cfg-font').value = project.font;
-                    document.getElementById('cfg-font-size').value = project.fontSize;
-                    document.getElementById('cfg-color-primary').value = project.colorPrimary;
-                    document.getElementById('cfg-color-accent').value = project.colorAccent;
-                    document.getElementById('cfg-color-panel').value = project.colorPanel;
-                    document.getElementById('cfg-color-text').value = project.colorText;
-                    document.getElementById('cfg-color-truth-btn').value = project.colorTruthBtn;
-                    document.getElementById('cfg-color-lie-btn').value = project.colorLieBtn;
-                    document.getElementById('cfg-lives').value = project.lives;
-                    document.getElementById('cfg-timer').value = project.timer;
-                    document.getElementById('cfg-delay').value = project.delay;
-                    document.getElementById('cfg-interval').value = project.interval;
-
-                    renderQuestions();
-                    updateConfig();
-                    alert("Проект успешно загружен!");
-                } catch (err) {
-                    alert("Некорректный файл конфигурации проекта.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // Экспорт HTML-кода для Genially
-        function exportGenially() {
-            const htmlCode = generateStandaloneHTML();
-            const modal = document.createElement('div');
-            modal.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md";
-            modal.innerHTML = `
-                <div class="glass-panel max-w-2xl w-full p-6 rounded-2xl space-y-4 border border-cyberNeon">
-                    <h3 class="font-orbitron font-bold text-base text-cyberCyan flex items-center justify-between">
-                        <span>Код для встраивания (Genially / Iframe)</span>
-                        <button onclick="this.closest('.fixed').remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                    </h3>
-                    <p class="text-xs text-slate-400">Скопируйте код ниже и вставьте в Genially во вкладке «Вставить» (Insert > Other > HTML-код):</p>
-                    <textarea readonly class="w-full h-48 p-3 rounded-lg bg-cyberDark border border-cyberBorder text-[10px] font-mono text-slate-300 select-all">${escapeHtml(htmlCode)}</textarea>
-                    <div class="flex justify-end space-x-3">
-                        <button onclick="navigator.clipboard.writeText(this.previousElementSibling.value); alert('Код скопирован!');" class="px-5 py-2 rounded-lg bg-cyberNeon text-white font-orbitron font-bold text-xs">
-                            Скопировать в буфер
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        // Скачивание полной автономной версии
-        function downloadHTML() {
-            const htmlCode = generateStandaloneHTML();
-            const blob = new Blob([htmlCode], { type: 'text/html;charset=utf-8' });
-            const dl = document.createElement('a');
-            dl.href = URL.createObjectURL(blob);
-            dl.download = `${project.title.replace(/\s+/g, '_')}_game.html`;
-            document.body.appendChild(dl);
-            dl.click();
-            dl.remove();
-        }
-
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        // Генерация автономного HTML-файла игры (экранируем обратные кавычки и переменные для корректного экспорта)
-        function generateStandaloneHTML() {
-            // Экранируем спецсимволы в вопросах, сохраняя математические формулы
-            const escapedQuestions = JSON.stringify(project.questions).replace(/\\/g, '\\\\');
-
-            return `<!DOCTYPE html>
-<html lang="\${project.lang}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>\${project.title}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&family=Press+Start+2P&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Поддержка LaTeX формул -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-
-    <style>
-        body {
-            background-color: #05070f;
-            color: \${project.colorText};
-            font-family: \${project.font};
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .glass-container {
-            background: rgba(15, 19, 38, 0.9);
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-        }
-    </style>
-</head>
-<body class="p-4 bg-slate-950 flex items-center justify-center">
-
-    <!-- Игровая панель -->
-    <div class="relative w-full max-w-4xl rounded-3xl overflow-hidden glass-container flex flex-col justify-between" style="min-height: 580px;">
-        
-        <!-- Обоина подозреваемого -->
-        <div class="absolute inset-0 bg-cover bg-center -z-10" style="background-image: url('\${project.bgImg}');"></div>
-        <div class="absolute inset-0 bg-slate-950/80 -z-10"></div>
-
-        <!-- 1. Стартовый экран -->
-        <div id="start-screen" class="absolute inset-0 z-40 flex flex-col items-center justify-center p-6 text-center bg-slate-950/95 \${project.titlePage ? '' : 'hidden'}">
-            <h1 class="text-2xl sm:text-3xl font-extrabold font-orbitron mb-2 text-white">\${project.title}</h1>
-            <p class="text-sm text-cyan-400 mb-8 font-mono">\${project.suspectName} - \${project.suspectRole}</p>
-            <button onclick="beginGame()" class="px-8 py-4 rounded-xl text-white font-orbitron font-bold text-sm tracking-widest transition-all hover:scale-105" style="background: linear-gradient(135deg, \${project.colorPrimary}, \limits\${project.colorAccent});">
-                НАЧАТЬ ДОПРОС
-            </button>
-            <p class="absolute bottom-6 text-[10px] text-slate-500 font-mono">Автор: Гальмиз Мария Александровна</p>
-        </div>
-
-        <!-- HUD -->
-        <div class="relative z-10 p-4 bg-slate-950/80 border-b border-purple-500/20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div id="hud-lives" class="flex space-x-1 text-xs"></div>
-                <span id="hud-score" class="text-xs font-mono text-slate-300">Счет: 0</span>
-            </div>
-            <div id="hud-timer-box" class="px-3 py-1 rounded bg-slate-900 border border-purple-500/20 text-xs font-mono text-cyan-400 flex items-center space-x-1">
-                <i class="fa-solid fa-stopwatch text-red-500"></i>
-                <span id="hud-timer">--</span>
-            </div>
-        </div>
-
-        <!-- Поле допроса -->
-        <div class="relative z-10 flex-grow flex flex-col md:flex-row items-center justify-between p-6 gap-6">
-            
-            <!-- Аватар -->
-            <div class="flex flex-col items-center justify-center w-full md:w-1/3">
-                <div class="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-purple-500/50 shadow-lg mb-3">
-                    <img src="\${project.suspectImg}" class="w-full h-full object-cover">
-                    <div id="stress-overlay" class="absolute inset-0 bg-red-600/30 flex items-center justify-center opacity-0 transition-opacity">
-                        <span class="text-[10px] font-orbitron font-extrabold text-white bg-red-600 px-2 py-0.5 rounded tracking-wider">СТРЕСС</span>
-                    </div>
-                </div>
-                <h4 class="font-orbitron font-bold text-sm text-white">\${project.suspectName}</h4>
-                <span class="text-[10px] text-slate-400 font-mono">\${project.suspectRole}</span>
-            </div>
-
-            <!-- Консоль детектора и Задание -->
-            <div class="w-full md:w-2/3 flex flex-col space-y-4">
-                
-                <!-- Анимация полиграфа -->
-                <div class="p-3 rounded-xl bg-slate-950/90 border border-purple-500/20 flex flex-col space-y-1">
-                    <div class="flex items-center justify-between text-[10px] font-mono">
-                        <span class="text-slate-400"><i class="fa-solid fa-wave-square text-cyan-400 mr-1"></i> ПОЛИГРАФ АКТИВЕН</span>
-                        <span id="heart-rate" class="text-emerald-400 font-bold">72 BPM</span>
-                    </div>
-                    <canvas id="game-polygraph" height="42" class="w-full rounded bg-slate-900/60"></canvas>
-                </div>
-
-                <!-- Вопрос -->
-                <div id="question-box" class="p-5 rounded-2xl border flex flex-col justify-between min-h-[160px]" style="background-color: \${project.colorPanel}; border-color: rgba(168,85,247,0.3);">
-                    <div id="question-text" class="font-semibold leading-relaxed" style="font-size: \${project.fontSize};"></div>
-                    <div id="answers-zone" class="space-y-2 mt-4"></div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Подвал -->
-        <footer class="relative z-10 py-3 px-6 bg-slate-950 border-t border-purple-500/20 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-            <span>КОНСПЕКТ ДОПРОСА</span>
-            <span>Автор: Гальмиз Мария Александровна</span>
-        </footer>
-
+<body>
+<header class="topbar">
+  <div class="logo"></div>
+  <div class="brand">Neon Interrogation Studio<div><small id="authorTop">Редактор учебных игр</small></div></div>
+  <div class="actions">
+    <button class="btn" id="newBtn"></button>
+    <button class="btn" id="saveBtn"></button>
+    <button class="btn" id="loadBtn"></button>
+    <button class="btn green" id="copyBtn"></button>
+    <button class="btn primary" id="downloadBtn"></button>
+    <input id="loadFile" type="file" accept=".json,application/json" hidden>
+  </div>
+</header>
+
+<div class="layout">
+<section class="editor">
+  <div class="section">
+    <h3 data-i18n="basic"></h3>
+    <div class="field"><label data-i18n="gameTitle"></label><input id="title" data-path="title" type="text"></div>
+    <div class="field"><label data-i18n="subtitle"></label><input data-path="subtitle" type="text"></div>
+    <div class="row">
+      <div class="field"><label data-i18n="language"></label><select id="language" data-path="lang"></select></div>
+      <div class="field"><label data-i18n="font"></label><select id="font" data-path="font"></select></div>
     </div>
+    <div class="row3">
+      <div class="field"><label data-i18n="fontSizeTitle"></label><input type="number" min="12" max="100" data-path="style.titleSize"></div>
+      <div class="field"><label data-i18n="fontSizeQuestion"></label><input type="number" min="12" max="80" data-path="style.questionSize"></div>
+      <div class="field"><label data-i18n="fontSizeAnswer"></label><input type="number" min="10" max="50" data-path="style.answerSize"></div>
+    </div>
+    <div class="row3">
+      <div class="field"><label data-i18n="titleColor"></label><input class="color" type="color" data-path="style.titleColor"></div>
+      <div class="field"><label data-i18n="questionColor"></label><input class="color" type="color" data-path="style.questionColor"></div>
+      <div class="field"><label data-i18n="answerColor"></label><input class="color" type="color" data-path="style.answerColor"></div>
+    </div>
+    <div class="row3">
+      <div class="field"><label data-i18n="buttonColor"></label><input class="color" type="color" data-path="style.buttonColor"></div>
+      <div class="field"><label data-i18n="cardColor"></label><input class="color" type="color" data-path="style.cardColor"></div>
+      <div class="field"><label data-i18n="gameBackgroundColor"></label><input class="color" type="color" data-path="style.gameBg"></div>
+    </div>
+  </div>
 
-    <script>
-        const state = {
-            title: \`\${project.title}\`,
-            lang: "\${project.lang}",
-            livesMax: \${project.lives},
-            timerMax: \${project.timer},
-            delaySec: \${project.delay},
-            colorPrimary: "\${project.colorPrimary}",
-            colorAccent: "\${project.colorAccent}",
-            colorPanel: "\${project.colorPanel}",
-            colorTruthBtn: "\${project.colorTruthBtn}",
-            colorLieBtn: "\${project.colorLieBtn}",
-            questions: JSON.parse('\${escapedQuestions}')
-        };
+  <div class="section">
+    <h3 data-i18n="titleScreen"></h3>
+    <label class="check"><input type="checkbox" data-path="titlePage.enabled"><span data-i18n="enableTitle"></span></label>
+    <div class="field"><label data-i18n="titleBackground"></label><div class="filebox"><label class="filelabel"><span data-i18n="upload"></span><input id="titleBgUpload" type="file" accept="image/*"></label><button class="mini" id="clearTitleBg" data-i18n="clear"></button></div><img class="asset" id="titleBgPreview"></div>
+    <div class="field"><label data-i18n="titleBgOpacity"></label><input type="range" min="0" max="100" data-path="titlePage.opacity"><div class="hint"><span id="opacityValue">70</span>%</div></div>
+    <div class="row">
+      <div class="field"><label data-i18n="titleCardColor"></label><input class="color" type="color" data-path="titlePage.cardColor"></div>
+      <div class="field"><label data-i18n="titleButtonText"></label><input type="text" data-path="titlePage.buttonText"></div>
+    </div>
+  </div>
 
-        const t = {
-            ru: { start: "НАЧАТЬ ДОПРОС", truth: "ПРАВДА", lie: "ЛОЖЬ!", lives: "Жизни", score: "Счет", timer: "Время", correct: "Верно!", wrong: "Ошибка!", suspect: "Подозреваемый", next: "Следующий вопрос", complete: "Допрос завершен!", restart: "Начать заново", enterAnswer: "Введите ответ...", submit: "Отправить" },
-            en: { start: "START INTERROGATION", truth: "TRUTH", lie: "LIE!", lives: "Lives", score: "Score", timer: "Time", correct: "Correct!", wrong: "Wrong!", suspect: "Suspect", next: "Next Statement", complete: "Interrogation Completed!", restart: "Restart", enterAnswer: "Enter answer...", submit: "Submit" },
-            es: { start: "INICIAR INTERROGATORIO", truth: "VERDAD", lie: "¡MENTIRA!", lives: "Vidas", score: "Puntuación", timer: "Tiempo", correct: "¡Correcto!", wrong: "¡Incorrecto!", suspect: "Sospechoso", next: "Siguiente declaración", complete: "¡Interrogatorio completado!", restart: "Reiniciar", enterAnswer: "Escriba su respuesta...", submit: "Enviar" },
-            fr: { start: "COMMENCER L'INTERROGATOIRE", truth: "VÉRITÉ", lie: "MENSONGE!", lives: "Vies", score: "Score", timer: "Temps", correct: "Correct!", wrong: "Erreur!", suspect: "Suspect", next: "Question suivante", complete: "Interrogatoire terminé!", restart: "Recommencer", enterAnswer: "Saisissez votre réponse...", submit: "Valider" },
-            de: { start: "VERHÖR STARTEN", truth: "WAHRHEIT", lie: "LÜGE!", lives: "Leben", score: "Punkte", timer: "Zeit", correct: "Richtig!", wrong: "Falsch!", suspect: "Verdächtiger", next: "Nächste Frage", complete: "Verhör abgeschlossen!", restart: "Neustart", enterAnswer: "Antwort eingeben...", submit: "Senden" }
-        }[state.lang];
+  <div class="section">
+    <h3 data-i18n="suspect"></h3>
+    <div class="row"><div class="field"><label data-i18n="suspectName"></label><input type="text" data-path="suspect.name"></div><div class="field"><label data-i18n="suspectRole"></label><input type="text" data-path="suspect.role"></div></div>
+    <div class="field"><label data-i18n="characterImage"></label><div class="filebox"><label class="filelabel"><span data-i18n="upload"></span><input id="suspectUpload" type="file" accept="image/*"></label><button class="mini" id="clearSuspect" data-i18n="clear"></button></div><img class="asset" id="suspectPreview"></div>
+    <div class="field"><label data-i18n="gameBackground"></label><div class="filebox"><label class="filelabel"><span data-i18n="upload"></span><input id="gameBgUpload" type="file" accept="image/*"></label><button class="mini" id="clearGameBg" data-i18n="clear"></button></div><img class="asset" id="gameBgPreview"></div>
+  </div>
 
-        let play = {
-            active: false,
-            currentIdx: 0,
-            score: 0,
-            lives: 3,
-            timerVal: 15,
-            timerInterval: null,
-            canAnswer: true
-        };
+  <div class="section">
+    <h3 data-i18n="rules"></h3>
+    <div class="row3">
+      <div class="field"><label data-i18n="lives"></label><input type="number" min="1" max="20" data-path="rules.lives"></div>
+      <div class="field"><label data-i18n="timer"></label><input type="number" min="0" max="3600" data-path="rules.timer"></div>
+      <div class="field"><label data-i18n="interval"></label><input type="number" min="0" max="60" step=".1" data-path="rules.interval"></div>
+    </div>
+    <label class="check"><input type="checkbox" data-path="rules.polygraph"><span data-i18n="polygraph"></span></label>
+    <label class="check"><input type="checkbox" data-path="rules.random"><span data-i18n="random"></span></label>
+  </div>
 
-        let polyCtx = null;
-        let polyOffset = 0;
-        let isStress = false;
+  <div class="section">
+    <h3 data-i18n="taskStyle"></h3>
+    <div class="row3">
+      <div class="field"><label data-i18n="taskQuestionSize"></label><input type="number" min="12" max="80" data-path="task.questionSize"></div>
+      <div class="field"><label data-i18n="taskAnswerSize"></label><input type="number" min="10" max="50" data-path="task.answerSize"></div>
+      <div class="field"><label data-i18n="radius"></label><input type="number" min="0" max="50" data-path="task.radius"></div>
+    </div>
+    <div class="row3">
+      <div class="field"><label data-i18n="taskCard"></label><input class="color" type="color" data-path="task.card"></div>
+      <div class="field"><label data-i18n="optionCard"></label><input class="color" type="color" data-path="task.option"></div>
+      <div class="field"><label data-i18n="correctColor"></label><input class="color" type="color" data-path="task.correct"></div>
+    </div>
+    <div class="field"><label data-i18n="math"></label><textarea data-path="mathHelp" placeholder="x^2, a_1, \frac{a}{b}, √(x)"></textarea></div>
+  </div>
 
-        function safeAttr(str) {
-            if (!str) return '';
-            return str.replace(/&/g, '&amp;')
-                      .replace(/"/g, '&quot;')
-                      .replace(/'/g, '&#39;')
-                      .replace(/</g, '&lt;')
-                      .replace(/>/g, '&gt;');
-        }
+  <div class="section">
+    <h3 data-i18n="questions"></h3>
+    <div class="tabs">
+      <button class="tab addq" data-type="single" data-i18n="one"></button>
+      <button class="tab addq" data-type="multi" data-i18n="many"></button>
+      <button class="tab addq" data-type="text" data-i18n="textAnswer"></button>
+      <button class="tab addq" data-type="oral" data-i18n="oral"></button>
+      <button class="tab addq" data-type="lie" data-i18n="lie"></button>
+    </div>
+    <div class="hint" data-i18n="teacherHint"></div>
+    <div class="questions" id="questions"></div>
+  </div>
 
-        function renderMath(element) {
-            if (typeof renderMathInElement === 'function') {
-                try {
-                    renderMathInElement(element, {
-                        delimiters: [
-                            {left: '$$', right: '$$', display: true},
-                            {left: '$', right: '$', display: false}
-                        ]
-                    });
-                } catch(e) {
-                    console.error(e);
-                }
-            } else {
-                setTimeout(() => renderMath(element), 100);
-            }
-        }
+  <div class="section">
+    <h3 data-i18n="genially"></h3>
+    <div class="field"><label data-i18n="publishedUrl"></label><input type="url" data-path="publishUrl" placeholder="https://username.github.io/repository/"></div>
+    <div class="hint" data-i18n="geniallyHint"></div>
+  </div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            if (!\${project.titlePage}) {
-                beginGame();
-            }
-            initPolygraph();
-            document.body.style.fontFamily = "\${project.font}";
-        });
+  <div class="section">
+    <button class="btn primary" id="testBtn" data-i18n="test"></button>
+    <button class="btn" id="resetBtn" data-i18n="reset"></button>
+    <div class="hint" data-i18n="liveHint"></div>
+  </div>
+  <div class="footer">Автор: <b>Гальмиз Мария Александровна</b></div>
+</section>
 
-        window.addEventListener('resize', () => {
-            const canvas = document.getElementById('game-polygraph');
-            if (canvas && canvas.parentElement) {
-                canvas.width = canvas.parentElement.clientWidth;
-            }
-        });
+<section class="preview">
+  <div class="previewbox"><iframe id="preview" title="Preview"></iframe></div>
+</section>
+</div>
+<div class="status" id="status"></div>
 
-        function beginGame() {
-            const start = document.getElementById('start-screen');
-            if (start) start.classList.add('hidden');
-            play.active = true;
-            play.currentIdx = 0;
-            play.score = 0;
-            play.lives = state.livesMax;
-            play.canAnswer = true;
-            
-            document.getElementById('hud-score').innerText = \`\${t.score}: 0\`;
-            drawLives();
-            loadQuestion();
-        }
-
-        function drawLives() {
-            const container = document.getElementById('hud-lives');
-            container.innerHTML = '';
-            if (state.livesMax === 999) {
-                container.innerHTML = \`<span class="text-rose-500"><i class="fa-solid fa-infinity"></i></span>\`;
-                return;
-            }
-            for (let i = 0; i < state.livesMax; i++) {
-                container.innerHTML += i < play.lives 
-                    ? \`<i class="fa-solid fa-heart text-red-500"></i>\` 
-                    : \`<i class="fa-solid fa-heart text-slate-700"></i>\`;
-            }
-        }
-
-        function loadQuestion() {
-            if (play.currentIdx >= state.questions.length) {
-                endGame(true);
-                return;
-            }
-
-            const q = state.questions[play.currentIdx];
-            const textEl = document.getElementById('question-text');
-            textEl.innerText = q.text;
-
-            renderMath(textEl);
-
-            isStress = q.isLie;
-            const overlay = document.getElementById('stress-overlay');
-            const hr = document.getElementById('heart-rate');
-            if (isStress) {
-                overlay.style.opacity = "1";
-                hr.innerText = "134 BPM (СТРЕСС)";
-                hr.className = "text-red-500 font-bold animate-pulse";
-            } else {
-                overlay.style.opacity = "0";
-                hr.innerText = "72 BPM";
-                hr.className = "text-emerald-400 font-bold";
-            }
-
-            const zone = document.getElementById('answers-zone');
-            zone.innerHTML = '';
-            play.canAnswer = true;
-
-            if (q.type === 'single') {
-                zone.innerHTML = \`
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="submit(false)" class="p-3 rounded-xl text-white font-orbitron font-bold text-xs shadow-md transition-all hover:brightness-110" style="background-color: \${state.colorTruthBtn};">
-                            \${t.truth}
-                        </button>
-                        <button onclick="submit(true)" class="p-3 rounded-xl text-white font-orbitron font-bold text-xs shadow-md transition-all hover:brightness-110" style="background-color: \${state.colorLieBtn};">
-                            \${t.lie}
-                        </button>
-                    </div>
-                \`;
-            } else if (q.type === 'multi') {
-                const indices = q.options.map((_, i) => i).sort(() => Math.random() - 0.5);
-                let html = \`<div class="grid grid-cols-1 gap-2">\`;
-                indices.forEach(idx => {
-                    html += \`
-                        <button onclick="submitMulti(\${idx})" class="p-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-purple-500/20 text-xs text-left transition-all text-slate-200">
-                            \${safeAttr(q.options[idx])}
-                        </button>
-                    \`;
-                });
-                html += \`</div>\`;
-                zone.innerHTML = html;
-            } else if (q.type === 'input') {
-                zone.innerHTML = \`
-                    <div class="flex space-x-2">
-                        <input type="text" id="typed-val" placeholder="\${t.enterAnswer}" class="flex-grow p-2.5 rounded-xl bg-slate-900 border border-purple-500/20 text-xs text-white">
-                        <button onclick="submitInput()" class="px-4 py-2.5 rounded-xl text-white font-orbitron text-xs font-bold transition-all" style="background-color: \${state.colorPrimary};">
-                            \${t.submit}
-                        </button>
-                    </div>
-                \`;
-            } else if (q.type === 'oral') {
-                zone.innerHTML = \`
-                    <div class="space-y-2">
-                        <button onclick="revealOral()" class="w-full p-3 rounded-xl bg-slate-900 border border-purple-500/30 text-white font-bold text-xs text-center transition-all">
-                            Показать ответ подозреваемого
-                        </button>
-                    </div>
-                \`;
-            }
-
-            if (state.timerMax > 0) {
-                document.getElementById('hud-timer-box').classList.remove('hidden');
-                play.timerVal = state.timerMax;
-                document.getElementById('hud-timer').innerText = play.timerVal;
-                
-                if (play.timerInterval) clearInterval(play.timerInterval);
-                play.timerInterval = setInterval(() => {
-                    play.timerVal--;
-                    document.getElementById('hud-timer').innerText = play.timerVal;
-                    if (play.timerVal <= 0) {
-                        clearInterval(play.timerInterval);
-                        failAnswer("Время истекло!");
-                    }
-                }, 1000);
-            } else {
-                document.getElementById('hud-timer-box').classList.add('hidden');
-            }
-        }
-
-        function submit(guessedLie) {
-            if (!play.canAnswer) return;
-            if (play.timerInterval) clearInterval(play.timerInterval);
-            
-            const q = state.questions[play.currentIdx];
-            if (guessedLie === q.isLie) {
-                answerSuccess(q.explanation);
-            } else {
-                failAnswer();
-            }
-        }
-
-        function submitMulti(idx) {
-            if (!play.canAnswer) return;
-            if (play.timerInterval) clearInterval(play.timerInterval);
-
-            const q = state.questions[play.currentIdx];
-            if (idx === 0) {
-                answerSuccess(q.explanation);
-            } else {
-                failAnswer();
-            }
-        }
-
-        function submitInput() {
-            if (!play.canAnswer) return;
-            if (play.timerInterval) clearInterval(play.timerInterval);
-
-            const val = document.getElementById('typed-val').value.trim().toLowerCase();
-            const q = state.questions[play.currentIdx];
-            if (val === q.options[0].trim().toLowerCase()) {
-                answerSuccess(q.explanation);
-            } else {
-                failAnswer();
-            }
-        }
-
-        function revealOral() {
-            if (!play.canAnswer) return;
-            if (play.timerInterval) clearInterval(play.timerInterval);
-            answerSuccess(state.questions[play.currentIdx].explanation);
-        }
-
-        function answerSuccess(explanation) {
-            play.canAnswer = false;
-            play.score += 100;
-            document.getElementById('hud-score').innerText = \`\${t.score}: \${play.score}\`;
-
-            const zone = document.getElementById('answers-zone');
-            zone.innerHTML = \`
-                <div class="p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs leading-relaxed">
-                    <p class="font-bold font-orbitron mb-1"><i class="fa-solid fa-circle-check mr-1"></i> \${t.correct}</p>
-                    <p>\${explanation || 'Успешно.'}</p>
-                </div>
-            \`;
-            
-            renderMath(zone);
-
-            setTimeout(() => {
-                play.currentIdx++;
-                loadQuestion();
-            }, state.delaySec * 1000);
-        }
-
-        function failAnswer(reason) {
-            if (state.livesMax !== 999) {
-                play.lives--;
-                drawLives();
-            }
-
-            const qBox = document.getElementById('question-box');
-            qBox.style.borderColor = "#ef4444";
-            setTimeout(() => { qBox.style.borderColor = "rgba(168,85,247,0.3)"; }, 600);
-
-            if (play.lives <= 0 && state.livesMax !== 999) {
-                setTimeout(() => { endGame(false); }, 800);
-            } else {
-                const q = state.questions[play.currentIdx];
-                play.canAnswer = false;
-                
-                const zone = document.getElementById('answers-zone');
-                zone.innerHTML = \`
-                    <div class="p-4 rounded-xl border border-rose-500/40 bg-rose-500/10 text-rose-300 text-xs leading-relaxed">
-                        <p class="font-bold font-orbitron mb-1"><i class="fa-solid fa-circle-xmark mr-1"></i> \${t.wrong}</p>
-                        <p>\${q.explanation || reason || 'Ошибка.'}</p>
-                    </div>
-                \`;
-                
-                renderMath(zone);
-
-                setTimeout(() => {
-                    play.currentIdx++;
-                    loadQuestion();
-                }, state.delaySec * 1000);
-            }
-        }
-
-        function endGame(win) {
-            play.active = false;
-            if (play.timerInterval) clearInterval(play.timerInterval);
-
-            const title = win ? "Допрос завершен!" : "Миссия провалена!";
-            const color = win ? "text-emerald-400" : "text-rose-500";
-
-            document.getElementById('question-text').innerHTML = \`
-                <div class="text-center space-y-4">
-                    <h3 class="text-xl font-bold font-orbitron \${color}">\${title}</h3>
-                    <p class="text-xs text-slate-400">Итоговый результат: \${play.score} очков</p>
-                    <button onclick="beginGame()" class="px-6 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-orbitron font-bold text-xs shadow transition-all">
-                        \${t.restart}
-                    </button>
-                </div>
-            \`;
-            document.getElementById('answers-zone').innerHTML = '';
-        }
-
-        // Детектор лжи (Canvas)
-        function initPolygraph() {
-            const canvas = document.getElementById('game-polygraph');
-            if (!canvas) return;
-            polyCtx = canvas.getContext('2d');
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = 42;
-
-            setInterval(() => {
-                if (!polyCtx) return;
-                const w = canvas.width;
-                const h = canvas.height;
-
-                polyCtx.fillStyle = "rgba(10, 12, 22, 0.3)";
-                polyCtx.fillRect(0, 0, w, h);
-
-                polyCtx.beginPath();
-                polyCtx.lineWidth = 1.5;
-                polyCtx.strokeStyle = isStress ? state.colorLieBtn : state.colorAccent;
-
-                for (let x = 0; x < w; x++) {
-                    let freq = isStress ? 0.08 : 0.04;
-                    let amp = isStress ? 15 : 5;
-                    let y = h / 2 + Math.sin((x + polyOffset) * freq) * amp;
-                    if (isStress && Math.random() > 0.8) {
-                        y += (Math.random() - 0.5) * 18;
-                    }
-                    if (x === 0) polyCtx.moveTo(x, y);
-                    else polyCtx.lineTo(x, y);
-                }
-                polyCtx.stroke();
-                polyOffset += isStress ? 9 : 3.5;
-            }, 50);
-        }
-    </script>
-</body>
-</html>`;
-        }
-    </script>
+<script>
+const I18N={
+ru:{name:"Русский",gameStart:"СТАРТ",gameLie:"ЛОЖЬ!",gameFalse:"ЛОЖЬ",gameTruth:"ПРАВДА",gameCheck:"ПРОВЕРИТЬ",gameSubmit:"ОТВЕТИТЬ",gameOral:"Произнесите ответ вслух",gameLives:"ЖИЗНИ",gameTime:"ВРЕМЯ",gameStatement:"УТВЕРЖДЕНИЕ",gameQuestion:"ВОПРОС",gameAnswer:"ОТВЕТ",gameCorrect:"Верно!",gameWrong:"Неверно!",gameOver:"Игра окончена",gameWin:"Вы победили!",gameRestart:"Играть снова",gameRebuttal:"Выберите правильное опровержение:",gamePolygraph:"ПОЛИГРАФ / ПУЛЬС",gameNormal:"НОРМА",gameStress:"СТРЕСС / ЛОЖЬ",basic:"Основные настройки",gameTitle:"Название игры",subtitle:"Подзаголовок",language:"Язык интерфейса",font:"Шрифт",fontSizeTitle:"Размер шрифта названия",fontSizeQuestion:"Размер шрифта вопроса",fontSizeAnswer:"Размер шрифта ответа",titleColor:"Цвет названия",questionColor:"Цвет вопроса",answerColor:"Цвет ответа",buttonColor:"Цвет кнопок",cardColor:"Цвет карточек",gameBackgroundColor:"Цвет фона игры",titleScreen:"Титульный лист",enableTitle:"Использовать титульный лист",titleBackground:"Фон титульного листа",upload:"Загрузить",clear:"Очистить",titleBgOpacity:"Прозрачность затемнения фона",titleCardColor:"Цвет карточки титульного листа",titleButtonText:"Текст кнопки",suspect:"Подозреваемый и изображения",suspectName:"Имя подозреваемого",suspectRole:"Роль / подпись",characterImage:"Спрайт персонажа",gameBackground:"Фон игры",rules:"Правила игры",lives:"Количество жизней",timer:"Таймер, секунд (0 = без таймера)",interval:"Пауза между вопросами, секунд",polygraph:"Автоматический полиграф",random:"Перемешивать вопросы",taskStyle:"Оформление окна задания",taskQuestionSize:"Размер вопроса",taskAnswerSize:"Размер текста ответа",radius:"Скругление карточек",taskCard:"Цвет окна задания",optionCard:"Цвет плашек ответов",correctColor:"Цвет правильного ответа",math:"Математическая запись",questions:"Задания учителя",one:"+ Один ответ",many:"+ Несколько",textAnswer:"+ Ввод",oral:"+ Устный",lie:"+ Ложь / правда",teacherHint:"Здесь учитель самостоятельно создаёт и редактирует задания. В проекте нет встроенных вопросов.",genially:"Genially",publishedUrl:"Опубликованный URL игры",geniallyHint:"Genially обычно не исполняет сложный JavaScript внутри srcdoc. Поэтому сначала разместите скачанный HTML на GitHub Pages, затем вставьте сюда его HTTPS-адрес. Кнопка ниже создаст обычный iframe без srcdoc.",test:"▶ Запустить тест",reset:"↺ Сбросить",liveHint:"Предпросмотр справа обновляется автоматически. Изменения не требуют подтверждения.",new:"＋ Новый",save:"💾 Сохранить",load:"📂 Загрузить",copy:"⧉ Код для Genially",download:"↓ Скачать HTML",typeSingle:"Один ответ",typeMulti:"Несколько ответов",typeText:"Ввод ответа",typeOral:"Устный ответ",typeLie:"Ложь / правда",question:"Текст вопроса / утверждения",answers:"Варианты ответа",correct:"Правильные номера",correctText:"Правильные ответы",explanation:"Пояснение",truth:"Это правда",rebut:"Варианты опровержения",rebutIndex:"Номер правильного опровержения",delete:"Удалить",addOption:"+ Добавить вариант",newQuestion:"Новое задание",titleButtonDefault:"Начать допрос",copyDone:"Код скопирован",saved:"Проект сохранён",loaded:"Проект загружен",downloaded:"HTML создан",noUrl:"Укажите URL опубликованной игры в поле Genially.",resetDone:"Предпросмотр сброшен"},
+en:{name:"English",gameStart:"START",gameLie:"LIE!",gameFalse:"FALSE",gameTruth:"TRUE",gameCheck:"CHECK",gameSubmit:"ANSWER",gameOral:"Say your answer aloud",gameLives:"LIVES",gameTime:"TIME",gameStatement:"STATEMENT",gameQuestion:"QUESTION",gameAnswer:"ANSWER",gameCorrect:"Correct!",gameWrong:"Incorrect!",gameOver:"Game over",gameWin:"You win!",gameRestart:"Play again",gameRebuttal:"Choose the correct refutation:",gamePolygraph:"POLYGRAPH / HEART RATE",gameNormal:"NORMAL",gameStress:"STRESS / LIE",basic:"Basic settings",gameTitle:"Game title",subtitle:"Subtitle",language:"Interface language",font:"Font",fontSizeTitle:"Title font size",fontSizeQuestion:"Question font size",fontSizeAnswer:"Answer font size",titleColor:"Title color",questionColor:"Question color",answerColor:"Answer color",buttonColor:"Button color",cardColor:"Card color",gameBackgroundColor:"Game background color",titleScreen:"Title screen",enableTitle:"Use title screen",titleBackground:"Title screen background",upload:"Upload",clear:"Clear",titleBgOpacity:"Background darkening opacity",titleCardColor:"Title card color",titleButtonText:"Button text",suspect:"Suspect and images",suspectName:"Suspect name",suspectRole:"Role / caption",characterImage:"Character sprite",gameBackground:"Game background",rules:"Game rules",lives:"Lives",timer:"Timer, seconds (0 = none)",interval:"Delay between questions, seconds",polygraph:"Automatic polygraph",random:"Shuffle questions",taskStyle:"Question window style",taskQuestionSize:"Question size",taskAnswerSize:"Answer text size",radius:"Card radius",taskCard:"Question window color",optionCard:"Answer card color",correctColor:"Correct answer color",math:"Mathematical notation",questions:"Teacher questions",one:"+ Single choice",many:"+ Multiple choice",textAnswer:"+ Text input",oral:"+ Oral",lie:"+ Lie / truth",teacherHint:"The teacher creates and edits all questions here. No built-in questions are included.",genially:"Genially",publishedUrl:"Published game URL",geniallyHint:"Genially often does not execute complex JavaScript inside srcdoc. Host the downloaded HTML on GitHub Pages, then enter its HTTPS address here. The button creates a normal iframe without srcdoc.",test:"▶ Test game",reset:"↺ Reset",liveHint:"The preview updates automatically. Changes do not require confirmation.",new:"＋ New",save:"💾 Save",load:"📂 Load",copy:"⧉ Genially code",download:"↓ Download HTML",typeSingle:"Single choice",typeMulti:"Multiple choice",typeText:"Text input",typeOral:"Oral answer",typeLie:"Lie / truth",question:"Question / statement",answers:"Answer options",correct:"Correct option numbers",correctText:"Accepted answers",explanation:"Explanation",truth:"This is true",rebut:"Refutations",rebutIndex:"Correct refutation number",delete:"Delete",addOption:"+ Add option",newQuestion:"New question",titleButtonDefault:"Start interrogation",copyDone:"Code copied",saved:"Project saved",loaded:"Project loaded",downloaded:"HTML created",noUrl:"Enter the published game URL in the Genially section.",resetDone:"Preview reset"},
+kk:{name:"Қазақша",gameStart:"БАСТАУ",gameLie:"ӨТІРІК!",gameFalse:"ӨТІРІК",gameTruth:"ШЫНДЫҚ",gameCheck:"ТЕКСЕРУ",gameSubmit:"ЖАУАП БЕРУ",gameOral:"Жауапты дауыстап айтыңыз",gameLives:"ӨМІР",gameTime:"УАҚЫТ",gameStatement:"МӘЛІМДЕМЕ",gameQuestion:"СҰРАҚ",gameAnswer:"ЖАУАП",gameCorrect:"Дұрыс!",gameWrong:"Қате!",gameOver:"Ойын аяқталды",gameWin:"Жеңіс!",gameRestart:"Қайта ойнау",gameRebuttal:"Дұрыс терістеуді таңдаңыз:",gamePolygraph:"ПОЛИГРАФ / ЖҮРЕК СОҒЫСЫ",gameNormal:"ҚАЛЫПТЫ",gameStress:"КҮЙЗЕЛІС / ӨТІРІК",basic:"Негізгі баптаулар",gameTitle:"Ойын атауы",subtitle:"Тақырыпша",language:"Интерфейс тілі",font:"Қаріп",fontSizeTitle:"Атау қаріп өлшемі",fontSizeQuestion:"Сұрақ қаріп өлшемі",fontSizeAnswer:"Жауап қаріп өлшемі",titleColor:"Атау түсі",questionColor:"Сұрақ түсі",answerColor:"Жауап түсі",buttonColor:"Батырма түсі",cardColor:"Карточка түсі",gameBackgroundColor:"Ойын фонының түсі",titleScreen:"Титул беті",enableTitle:"Титул бетін қолдану",titleBackground:"Титул бетінің фоны",upload:"Жүктеу",clear:"Тазалау",titleBgOpacity:"Фонды қараңғылау мөлдірлігі",titleCardColor:"Титул карточкасының түсі",titleButtonText:"Батырма мәтіні",suspect:"Күдікті және суреттер",suspectName:"Күдіктінің аты",suspectRole:"Рөлі / жазуы",characterImage:"Кейіпкер спрайты",gameBackground:"Ойын фоны",rules:"Ойын ережелері",lives:"Өмір саны",timer:"Таймер, секунд (0 = жоқ)",interval:"Сұрақтар арасындағы кідіріс, секунд",polygraph:"Автоматты полиграф",random:"Сұрақтарды араластыру",taskStyle:"Тапсырма терезесінің стилі",taskQuestionSize:"Сұрақ өлшемі",taskAnswerSize:"Жауап мәтінінің өлшемі",radius:"Карточка бұрышы",taskCard:"Тапсырма терезесінің түсі",optionCard:"Жауап плашкасының түсі",correctColor:"Дұрыс жауап түсі",math:"Математикалық жазу",questions:"Мұғалім тапсырмалары",one:"+ Бір жауап",many:"+ Бірнеше жауап",textAnswer:"+ Мәтін",oral:"+ Ауызша",lie:"+ Өтірік / шындық",teacherHint:"Барлық тапсырманы мұғалім осы жерде өзі жасайды және өңдейді. Дайын сұрақтар жоқ.",genially:"Genially",publishedUrl:"Жарияланған ойын URL",geniallyHint:"Genially srcdoc ішіндегі күрделі JavaScript-ті іске қоспауы мүмкін. HTML файлын GitHub Pages-ке орналастырып, HTTPS мекенжайын осы жерге енгізіңіз. Батырма srcdoc қолданбайтын кәдімгі iframe жасайды.",test:"▶ Тестілеу",reset:"↺ Қалпына келтіру",liveHint:"Алдын ала қарау автоматты түрде жаңарады. Өзгерістерді растау қажет емес.",new:"＋ Жаңа",save:"💾 Сақтау",load:"📂 Жүктеу",copy:"⧉ Genially коды",download:"↓ HTML жүктеу",typeSingle:"Бір жауап",typeMulti:"Бірнеше жауап",typeText:"Мәтін енгізу",typeOral:"Ауызша жауап",typeLie:"Өтірік / шындық",question:"Сұрақ / мәлімдеме",answers:"Жауап нұсқалары",correct:"Дұрыс нөмірлер",correctText:"Дұрыс жауаптар",explanation:"Түсіндірме",truth:"Бұл шындық",rebut:"Теріске шығару нұсқалары",rebutIndex:"Дұрыс терістеу нөмірі",delete:"Жою",addOption:"+ Нұсқа қосу",newQuestion:"Жаңа тапсырма",titleButtonDefault:"Сұрақ алуды бастау",copyDone:"Код көшірілді",saved:"Жоба сақталды",loaded:"Жоба жүктелді",downloaded:"HTML жасалды",noUrl:"Genially бөлімінде жарияланған ойын URL мекенжайын енгізіңіз.",resetDone:"Алдын ала қарау қалпына келтірілді"}
+};
+const FONTS={Inter:"Inter,Arial,sans-serif",Montserrat:"Montserrat,Arial,sans-serif","Space Grotesk":"'Space Grotesk',Arial,sans-serif",Orbitron:"Orbitron,Arial,sans-serif,Arial",Georgia:"Georgia,serif",Verdana:"Verdana,sans-serif","Courier New":"'Courier New',monospace"};
+const DEFAULT={
+ title:"Допрос подозреваемого",subtitle:"Interrogation & Heart Rate",lang:"ru",font:"Inter",
+ style:{titleSize:48,questionSize:30,answerSize:17,titleColor:"#d95cff",questionColor:"#ffffff",answerColor:"#d8d9ff",buttonColor:"#9a43ff",cardColor:"#0d122b",gameBg:"#050713"},
+ titlePage:{enabled:true,opacity:70,cardColor:"#0d1128",buttonText:"",bg:""},
+ suspect:{name:"",role:"",img:"",gameBg:""},
+ rules:{lives:3,timer:0,interval:1.5,polygraph:true,random:false},
+ task:{questionSize:30,answerSize:17,radius:18,card:"#0d122b",option:"#151b3b",correct:"#31e6a2"},
+ mathHelp:"",publishUrl:"",questions:[]
+};
+let state=clone(DEFAULT);
+const $=s=>document.querySelector(s);
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function pathGet(o,p){return p.split(".").reduce((a,k)=>a==null?undefined:a[k],o)}
+function pathSet(o,p,v){const a=p.split(".");let x=o;for(let i=0;i<a.length-1;i++){if(!x[a[i]])x[a[i]]={};x=x[a[i]]}x[a[a.length-1]]=v}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function toast(key){const t=$("#status");t.textContent=(I18N[state.lang]||I18N.ru)[key]||key;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),1700)}
+function fileData(file,cb){const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(file)}
+function setupLanguage(){
+ $("#language").innerHTML=Object.entries(I18N).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join("");
+ $("#font").innerHTML=Object.keys(FONTS).map(k=>`<option value="${k}">${k}</option>`).join("");
+ document.querySelectorAll("[data-path]").forEach(el=>{
+   const v=pathGet(state,el.dataset.path);
+   if(el.type==="checkbox")el.checked=!!v;else el.value=v??"";
+   el.oninput=el.onchange=()=>{let x=el.type==="checkbox"?el.checked:el.value;if(el.type==="number"||el.type==="range")x=Number(x);pathSet(state,el.dataset.path,x);renderEditor();renderPreview()};
+ });
+}
+function translateEditor(){
+ const t=I18N[state.lang]||I18N.ru;
+ document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.dataset.i18n;if(t[k]!=null)el.textContent=t[k]});
+ $("#newBtn").textContent=t.new;$("#saveBtn").textContent=t.save;$("#loadBtn").textContent=t.load;$("#copyBtn").textContent=t.copy;$("#downloadBtn").textContent=t.download;
+ $("#authorTop").textContent=t.basic;
+ $("#opacityValue").textContent=state.titlePage.opacity;
+}
+function renderEditor(){
+ translateEditor();
+ document.querySelectorAll("[data-path]").forEach(el=>{const v=pathGet(state,el.dataset.path);if(el.type==="checkbox")el.checked=!!v;else if(document.activeElement!==el)el.value=v??""});
+ $("#titleBgPreview").src=state.titlePage.bg||placeholder();
+ $("#suspectPreview").src=state.suspect.img||placeholder();
+ $("#gameBgPreview").src=state.suspect.gameBg||placeholder();
+ renderQuestions();
+}
+function placeholder(){return "data:image/svg+xml;charset=utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="180"><rect width="100%" height="100%" fill="#090d1e"/><text x="50%" y="50%" fill="#70769d" text-anchor="middle" font-family="Arial" font-size="16">—</text></svg>')}
+function typeName(type){const t=I18N[state.lang]||I18N.ru;return t["type"+type.charAt(0).toUpperCase()+type.slice(1)]||type}
+function renderQuestions(){
+ const t=I18N[state.lang]||I18N.ru;
+ $("#questions").innerHTML=state.questions.map((q,i)=>{
+  let extra="";
+  if(q.type==="single"||q.type==="multi"){
+    extra=`<div class="field"><label>${t.answers}</label><div class="option-editor">${q.options.map((o,j)=>`<div class="option-row"><input class="qo" data-j="${j}" value="${esc(o)}"><button class="mini danger remove-option" data-j="${j}">×</button></div>`).join("")}</div><button class="mini add-option">${t.addOption}</button></div>
+    <div class="field"><label>${t.correct}</label><input class="qc" value="${q.correct.map(x=>x+1).join(",")}"></div>`;
+  }else if(q.type==="text"){
+    extra=`<div class="field"><label>${t.correctText}</label><input class="qc" value="${esc(q.correct.join(" | "))}"></div>`;
+  }else if(q.type==="lie"){
+    extra=`<label class="check"><input class="qtruth" type="checkbox" ${q.truth?"checked":""}><span>${t.truth}</span></label>
+    <div class="field"><label>${t.rebut}</label><textarea class="qr">${esc(q.rebuttals.join("\\n"))}</textarea></div>
+    <div class="field"><label>${t.rebutIndex}</label><input class="qri" type="number" min="1" value="${(q.correctRebuttal??0)+1}"></div>`;
+  }
+  return `<div class="qcard" data-id="${q.id}">
+    <div class="qtop"><b>${i+1}. ${typeName(q.type)}</b><button class="mini danger delete-q">${t.delete}</button></div>
+    <div class="field"><label>${t.question}</label><textarea class="qt">${esc(q.text)}</textarea></div>
+    ${extra}
+    <div class="field"><label>${t.explanation}</label><input class="qe" value="${esc(q.explanation||"")}"></div>
+  </div>`
+ }).join("");
+ $("#questions").querySelectorAll(".qcard").forEach(card=>{
+  const q=state.questions.find(x=>String(x.id)===card.dataset.id);
+  const sync=()=>{q.text=card.querySelector(".qt").value;q.explanation=card.querySelector(".qe").value;
+    if(q.type==="single"||q.type==="multi"){q.options=[...card.querySelectorAll(".qo")].map(x=>x.value);q.correct=(card.querySelector(".qc").value||"").split(",").map(x=>Number(x.trim())-1).filter(x=>x>=0)}
+    if(q.type==="text")q.correct=(card.querySelector(".qc").value||"").split("|").map(x=>x.trim()).filter(Boolean);
+    if(q.type==="lie"){q.truth=card.querySelector(".qtruth").checked;q.rebuttals=card.querySelector(".qr").value.split("\\n").filter(Boolean);q.correctRebuttal=Math.max(0,Number(card.querySelector(".qri").value||1)-1)}
+    renderPreview();
+  };
+  card.querySelectorAll("input,textarea").forEach(el=>el.addEventListener("input",sync));
+  card.querySelector(".delete-q").onclick=()=>{state.questions=state.questions.filter(x=>String(x.id)!==card.dataset.id);renderEditor();renderPreview()};
+  card.querySelector(".add-option")?.addEventListener("click",()=>{q.options.push("Новый вариант");renderEditor();renderPreview()});
+  card.querySelectorAll(".remove-option").forEach(b=>b.onclick=()=>{q.options.splice(Number(b.dataset.j),1);q.correct=q.correct.filter(x=>x<q.options.length);renderEditor();renderPreview()});
+ });
+}
+function addQuestion(type){
+ const q={id:Date.now()+Math.random(),type,text:"",options:type==="single"||type==="multi"?["",""]:[],correct:type==="text"?[""]:type==="single"||type==="multi"?[0]:[],truth:false,rebuttals:[""],correctRebuttal:0,explanation:""};
+ state.questions.push(q);renderEditor();renderPreview();
+ setTimeout(()=>$("#questions").lastElementChild?.scrollIntoView({behavior:"smooth"}),50);
+}
+function wire(){
+ document.querySelectorAll(".addq").forEach(b=>b.onclick=()=>addQuestion(b.dataset.type));
+ $("#titleBgUpload").onchange=e=>{if(e.target.files[0])fileData(e.target.files[0],x=>{state.titlePage.bg=x;renderEditor();renderPreview()})};
+ $("#suspectUpload").onchange=e=>{if(e.target.files[0])fileData(e.target.files[0],x=>{state.suspect.img=x;renderEditor();renderPreview()})};
+ $("#gameBgUpload").onchange=e=>{if(e.target.files[0])fileData(e.target.files[0],x=>{state.suspect.gameBg=x;renderEditor();renderPreview()})};
+ $("#clearTitleBg").onclick=()=>{state.titlePage.bg="";renderEditor();renderPreview()};
+ $("#clearSuspect").onclick=()=>{state.suspect.img="";renderEditor();renderPreview()};
+ $("#clearGameBg").onclick=()=>{state.suspect.gameBg="";renderEditor();renderPreview()};
+ $("#newBtn").onclick=()=>{state=clone(DEFAULT);renderEditor();renderPreview();toast("resetDone")};
+ $("#saveBtn").onclick=save;
+ $("#loadBtn").onclick=()=>$("#loadFile").click();
+ $("#loadFile").onchange=load;
+ $("#downloadBtn").onclick=download;
+ $("#copyBtn").onclick=copyGenially;
+ $("#testBtn").onclick=()=>post({cmd:"start"});
+ $("#resetBtn").onclick=()=>{post({cmd:"reset"});toast("resetDone")};
+}
+function gameHtml(){
+ const cfg=JSON.stringify(state).replace(/</g,"\\u003c");
+ const lang=JSON.stringify(I18N);
+ return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(state.title)}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:${state.style.gameBg};color:#fff;font-family:${FONTS[state.font]};min-height:100vh}.app{min-height:100vh;padding:24px;background:${state.suspect.gameBg?`linear-gradient(#03040b88,#03040bcc),url("${state.suspect.gameBg}")`:"radial-gradient(circle at 70% 10%,#24105a 0,#070917 50%,#03050d 100%)"};background-size:cover;background-position:center}.wrap{max-width:1250px;margin:auto}.start{min-height:calc(100vh - 48px);display:grid;place-items:center}.titlecard{position:relative;overflow:hidden;max-width:820px;width:100%;padding:48px;text-align:center;border:1px solid #363d73;border-radius:26px;background:${state.titlePage.cardColor}eF;box-shadow:0 25px 100px #000b}.titlebg{position:absolute;inset:0;background:${state.titlePage.bg?`url("${state.titlePage.bg}") center/cover no-repeat`:"none"};opacity:${Math.max(0,Math.min(100,state.titlePage.opacity))/100};z-index:0}.titlecontent{position:relative;z-index:1}.game-title{font-size:${state.style.titleSize}px;line-height:1.05;font-weight:900;color:${state.style.titleColor};text-shadow:0 0 30px ${state.style.titleColor}66}.subtitle{color:#b5b9da;margin:12px 0 24px}.btn{border:0;border-radius:12px;background:${state.style.buttonColor};color:#fff;padding:13px 20px;font-weight:900;font-size:16px;box-shadow:0 10px 35px ${state.style.buttonColor}55}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.hud{display:flex;gap:8px;flex-wrap:wrap}.badge{background:#0c1028dd;border:1px solid #2a3159;border-radius:11px;padding:9px 12px}.main{display:grid;grid-template-columns:minmax(270px,38%) 1fr;gap:16px}.suspect,.task,.poly{background:${state.style.cardColor}ed;border:1px solid #2a315e;border-radius:${state.task.radius}px;box-shadow:0 20px 70px #0008}.suspect{padding:14px}.suspect img{width:100%;height:390px;object-fit:contain;background:#070a19;border-radius:12px}.who{font-weight:900;font-size:18px;margin-top:10px}.role{font-size:12px;color:#969bc1}.poly{padding:11px;margin-top:12px}.polyhead{display:flex;justify-content:space-between;font-size:10px;color:#a8acd0}.zone{height:8px;border-radius:8px;margin:8px 0;background:linear-gradient(90deg,#31e6a2 0 58%,#ffd95a 58% 76%,#ff4d78 76%);position:relative}.needle{position:absolute;left:20%;top:-4px;width:4px;height:16px;background:#fff;box-shadow:0 0 10px #fff;transition:.3s}.lights{display:flex;gap:7px}.light{width:13px;height:13px;border-radius:50%;background:#2b3148}.green.on{background:#31e6a2;box-shadow:0 0 14px #31e6a2}.red.on{background:#ff4d78;box-shadow:0 0 14px #ff4d78}.chart{height:68px;margin-top:6px;background:#070a18;border-radius:8px;overflow:hidden}.chart svg{width:100%;height:100%}.task{padding:25px;min-height:530px;display:flex;flex-direction:column;justify-content:center}.label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#8f95bf;margin-bottom:10px}.question{font-size:${state.task.questionSize}px;line-height:1.2;font-weight:900;color:${state.style.questionColor};margin-bottom:20px}.options{display:grid;gap:10px}.option{border:1px solid #303762;border-radius:${state.task.radius}px;background:${state.task.option};color:${state.style.answerColor};padding:13px;text-align:left;font-size:${state.task.answerSize}px}.option.selected{border-color:${state.style.buttonColor};background:${state.style.buttonColor}35}.option.correct{border-color:${state.task.correct};background:${state.task.correct}25}.option.wrong{border-color:#ff4d78;background:#ff4d7825;color:#fff}.answer-input{width:100%;padding:13px;border-radius:${state.task.radius}px;border:1px solid #303762;background:${state.task.option};color:#fff;font-size:${state.task.answerSize}px}.answer-input.wrong{border-color:#ff4d78;background:#ff4d7825}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.secondary{background:#171c3b;box-shadow:none}.lie{background:#ff3d70}.notice{color:#c3c6df;line-height:1.5;margin-top:12px}.timer{height:5px;background:#202644;border-radius:5px;margin-top:12px;overflow:hidden}.fill{height:100%;background:${state.style.buttonColor};width:100%;transform-origin:left}.footer{text-align:center;color:#70769a;font-size:11px;padding:20px}.end{text-align:center;padding:70px 20px}.end h2{font-size:48px;color:${state.style.titleColor}}.rebut{margin-top:14px}.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle}.frac span:first-child{border-bottom:1px solid currentColor}.rad{border-top:1px solid currentColor}@media(max-width:900px){.main{grid-template-columns:1fr}.suspect img{height:280px}.task{min-height:430px}}
+</style><body><div class="app"><div class="wrap" id="root"></div><div class="footer">Автор: Гальмиз Мария Александровна</div></div>
+<script>
+const CFG=${cfg},L=${lang};const T=L[CFG.lang]||L.ru;const root=document.getElementById("root");let qs=CFG.questions.slice(),idx=-1,lives=CFG.rules.lives,selected=[],timer=null,left=0;
+if(CFG.rules.random)qs.sort(()=>Math.random()-.5);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+function math(s){s=esc(s);s=s.replace(/\\\\frac\\{([^{}]+)\\}\\{([^{}]+)\\}/g,'<span class="frac"><span>$1</span><span>$2</span></span>').replace(/\\^([A-Za-z0-9]+)/g,'<sup>$1</sup>').replace(/_([A-Za-z0-9]+)/g,'<sub>$1</sub>').replace(/√\\(([^)]+)\\)/g,'√<span class="rad">$1</span>');return s}
+function start(){clearInterval(timer);idx=-1;lives=CFG.rules.lives;next()}
+function startScreen(){if(!CFG.titlePage.enabled){start();return}root.innerHTML='<div class="start"><div class="titlecard"><div class="titlebg"></div><div class="titlecontent"><div class="game-title">'+esc(CFG.title)+'</div><div class="subtitle">'+esc(CFG.subtitle)+'</div><div class="subtitle">'+esc(CFG.suspect.name||"")+' '+esc(CFG.suspect.role||"")+'</div><button class="btn" onclick="start()">'+esc(CFG.titlePage.buttonText||T.gameStart)+'</button></div></div></div>'}
+function next(){clearInterval(timer);idx++;selected=[];if(idx>=qs.length){end(true);return}left=CFG.rules.timer;draw();if(left>0){timer=setInterval(()=>{left--;updateTimer();if(left<=0){clearInterval(timer);wrong()}},1000)}}
+function updateTimer(){const x=document.querySelector("#timerText"),f=document.querySelector(".fill");if(x)x.textContent=left+"s";if(f)f.style.width=Math.max(0,left/CFG.rules.timer*100)+"%"}
+function poly(lie){if(!CFG.rules.polygraph)return;const n=document.querySelector(".needle"),r=document.querySelector(".red"),g=document.querySelector(".green"),p=document.querySelector("#wave");if(!n)return;n.style.left=(lie?88:20)+"%";r.classList.toggle("on",lie);g.classList.toggle("on",!lie);let d="M0 50";for(let x=0;x<=500;x+=8){let y=50+Math.sin(x/(lie?6:16))*(lie?25:7)+(Math.random()-.5)*(lie?9:2);d+=" L"+x+" "+y}p.setAttribute("d",d)}
+function draw(){const q=qs[idx],lie=q.type==="lie";root.innerHTML='<div class="top"><div><div class="game-title">'+esc(CFG.title)+'</div><div class="subtitle">'+esc(CFG.subtitle)+'</div></div><div class="hud"><span class="badge">'+esc(T.gameLives)+": "+'❤'.repeat(Math.max(0,lives))+'</span>'+(CFG.rules.timer>0?'<span class="badge">'+esc(T.gameTime)+': <span id="timerText">'+left+'s</span></span>':'')+'</div></div><div class="main"><div><div class="suspect">'+(CFG.suspect.img?'<img src="'+CFG.suspect.img+'">':'')+'<div class="who">'+esc(CFG.suspect.name||"")+'</div><div class="role">'+esc(CFG.suspect.role||"")+'</div></div><div class="poly"><div class="polyhead"><span>'+esc(T.gamePolygraph)+'</span><span id="zone">'+esc(T.gameNormal)+'</span></div><div class="zone"><i class="needle"></i></div><div class="lights"><i class="light green"></i><i class="light red"></i></div><div class="chart"><svg viewBox="0 0 500 100" preserveAspectRatio="none"><path id="wave" d="M0 50 L500 50" fill="none" stroke="#7f8aff" stroke-width="3"/></svg></div></div></div><div class="task"><div class="label">'+(lie?T.gameStatement:T.gameQuestion)+' · '+(idx+1)+' / '+qs.length+'</div><div class="question">'+math(q.text)+'</div><div id="area"></div><div class="actions" id="actions"></div><div class="notice" id="notice"></div></div></div>'+(CFG.rules.timer>0?'<div class="timer"><div class="fill"></div></div>':'');poly(lie&&!q.truth);answer(q)}
+function answer(q){const area=document.querySelector("#area"),a=document.querySelector("#actions");if(q.type==="lie"){area.innerHTML='<div class="notice">'+(q.truth?T.gameTruth:T.gameFalse)+'</div>';a.innerHTML='<button class="btn lie" onclick="judge(false)">'+T.gameLie+'</button><button class="btn secondary" onclick="judge(true)">'+T.gameTruth+'</button>';return}if(q.type==="oral"){area.innerHTML='<div class="notice" id="oralStatus">'+T.gameOral+'</div><button class="option" id="micBtn" type="button">🎙 '+T.gameSubmit+'</button>';a.innerHTML='<button class="btn secondary" onclick="good()">'+T.gameCheck+'</button>';const mb=document.getElementById("micBtn");const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){mb.onclick=()=>{const r=new SR();r.lang=CFG.lang==="ru"?"ru-RU":CFG.lang==="en"?"en-US":CFG.lang==="kk"?"kk-KZ":CFG.lang+"-"+CFG.lang.toUpperCase();r.onstart=()=>document.getElementById("oralStatus").textContent=T.gameOral+" …";r.onresult=e=>document.getElementById("oralStatus").textContent=e.results[0][0].transcript;r.onerror=()=>document.getElementById("oralStatus").textContent=T.gameOral;r.start()}}else mb.disabled=true;return}if(q.type==="text"){area.innerHTML='<input id="text" class="answer-input" placeholder="'+esc(T.gameAnswer)+'">';a.innerHTML='<button class="btn" onclick="checkText()">'+T.gameCheck+'</button>';return}area.innerHTML='<div class="options">'+q.options.map((x,j)=>'<button class="option" onclick="pick('+j+')" data-j="'+j+'">'+math(x)+'</button>').join("")+'</div>';a.innerHTML='<button class="btn" onclick="checkChoice()">'+T.gameCheck+'</button>'}
+function pick(j){const q=qs[idx];selected=q.type==="single"?[j]:(selected.includes(j)?selected.filter(x=>x!==j):selected.concat(j));document.querySelectorAll(".option").forEach((x,k)=>x.classList.toggle("selected",selected.includes(k)))}
+function checkChoice(){const q=qs[idx],a=[...selected].sort(),c=[...q.correct].sort();if(JSON.stringify(a)===JSON.stringify(c)){document.querySelectorAll(".option").forEach((x,k)=>x.classList.toggle("correct",c.includes(k)));good()}else{document.querySelectorAll(".option").forEach((x,k)=>{if(selected.includes(k))x.classList.add("wrong")});wrong()}}
+function checkText(){const v=(document.querySelector("#text").value||"").trim().toLowerCase(),q=qs[idx];if(q.correct.some(x=>v===String(x).trim().toLowerCase()))good();else{document.querySelector("#text").classList.add("wrong");wrong()}}
+function judge(truthPressed){const q=qs[idx];if(truthPressed===q.truth){poly(!q.truth);if(!q.truth&&document.querySelector("#zone"))document.querySelector("#zone").textContent=T.gameStress;if(q.truth&&document.querySelector("#zone"))document.querySelector("#zone").textContent=T.gameNormal;if(q.truth)good();else showRebut()}else wrong()}
+function showRebut(){const q=qs[idx];document.querySelector("#area").innerHTML='<div class="label">'+T.gameRebuttal+'</div><div class="options">'+q.rebuttals.map((x,j)=>'<button class="option" onclick="rebut('+j+')">'+esc(x)+'</button>').join("")+'</div>';document.querySelector("#actions").innerHTML=""}
+function rebut(j){const q=qs[idx];if(j===q.correctRebuttal)good();else wrong()}
+function good(){clearInterval(timer);const n=document.querySelector("#notice");if(n)n.textContent=T.gameCorrect;setTimeout(next,Math.max(0,CFG.rules.interval*1000))}
+function wrong(){clearInterval(timer);lives--;const n=document.querySelector("#notice");if(n)n.textContent=T.gameWrong;if(lives<=0){setTimeout(()=>end(false),600);return}setTimeout(next,Math.max(0,CFG.rules.interval*1000))}
+function end(win){clearInterval(timer);root.innerHTML='<div class="end"><h2>'+esc(win?T.gameWin:T.gameOver)+'</h2><p>'+esc(T.gameLives)+": "+lives+'</p><button class="btn" onclick="start()">'+esc(T.gameRestart)+'</button></div>'}
+window.addEventListener("message",e=>{if(e.data?.cmd==="start")start();if(e.data?.cmd==="reset")startScreen()});
+startScreen();
+<\/script></body></html>`;
+}
+function renderPreview(){ $("#preview").srcdoc=gameHtml() }
+function post(x){$("#preview").contentWindow?.postMessage(x,"*")}
+function save(){const b=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="interrogation-project.json";a.click();URL.revokeObjectURL(a.href);toast("saved")}
+function load(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=Object.assign(clone(DEFAULT),JSON.parse(r.result));state.style=Object.assign(clone(DEFAULT.style),state.style);state.titlePage=Object.assign(clone(DEFAULT.titlePage),state.titlePage);state.suspect=Object.assign(clone(DEFAULT.suspect),state.suspect);state.rules=Object.assign(clone(DEFAULT.rules),state.rules);state.task=Object.assign(clone(DEFAULT.task),state.task);setupLanguage();renderEditor();renderPreview();toast("loaded")}catch{}};r.readAsText(f);e.target.value=""}
+function download(){const b=new Blob([gameHtml()],{type:"text/html;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="interrogation-game.html";a.click();URL.revokeObjectURL(a.href);toast("downloaded")}
+async function copyGenially(){
+ const url=(state.publishUrl||"").trim();
+ if(!url){toast("noUrl");return}
+ const code='<iframe src="'+url.replace(/"/g,"&quot;")+'" title="'+esc(state.title)+'" width="100%" height="800" style="border:0;border-radius:18px;display:block" allow="fullscreen"></iframe>';
+ try{await navigator.clipboard.writeText(code);toast("copyDone")}catch{const ta=document.createElement("textarea");ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast("copyDone")}
+}
+setupLanguage();wire();renderEditor();renderPreview();
+</script>
 </body>
 </html>
