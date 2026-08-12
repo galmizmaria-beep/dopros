@@ -57,6 +57,8 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
       <div class="field"><label>Цвет панелей</label><input type="color" class="color" id="panelColor" data-bind="theme.panel"></div>
     </div>
     <div class="field switch"><input type="checkbox" id="titlePage" data-bind="titlePage"><label for="titlePage">Показывать титульный лист</label></div>
+    <div class="field"><label>Текст кнопки "Старт"</label><input data-bind="startBtnText"></div>
+    <div class="field"><label>Текст кнопки "Переиграть"</label><input data-bind="replayBtnText"></div>
   </div>
 
   <div class="section">
@@ -70,7 +72,17 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
   </div>
 
   <div class="section">
-    <h3>3. Правила игры</h3>
+    <h3>3. Экраны победы и поражения</h3>
+    <div class="field"><label>Заголовок победы</label><input data-bind="winScreen.title"></div>
+    <div class="field"><label>Текст победы</label><textarea data-bind="winScreen.text"></textarea></div>
+    <div class="field"><label>Картинка победы</label><div class="upload"><label class="file-label">Загрузить изображение<input type="file" accept="image/*" id="winImgUpload"></label><button class="mini" id="clearWinImg">Очистить</button></div><img class="asset-preview" id="winImgPreview" alt=""></div>
+    <div class="field"><label>Заголовок поражения</label><input data-bind="loseScreen.title"></div>
+    <div class="field"><label>Текст поражения</label><textarea data-bind="loseScreen.text"></textarea></div>
+    <div class="field"><label>Картинка поражения</label><div class="upload"><label class="file-label">Загрузить изображение<input type="file" accept="image/*" id="loseImgUpload"></label><button class="mini" id="clearLoseImg">Очистить</button></div><img class="asset-preview" id="loseImgPreview" alt=""></div>
+  </div>
+
+  <div class="section">
+    <h3>4. Правила игры</h3>
     <div class="row3">
       <div class="field"><label>Жизни</label><input type="number" min="1" max="20" data-bind="settings.lives"></div>
       <div class="field"><label>Таймер, сек</label><input type="number" min="0" max="3600" data-bind="settings.timer"></div>
@@ -81,7 +93,7 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
   </div>
 
   <div class="section">
-    <h3>4. Вопросы и утверждения</h3>
+    <h3>5. Вопросы и утверждения</h3>
     <div class="tabs">
       <button class="tab active" id="addSingle">+ Один ответ</button>
       <button class="tab" id="addMulti">+ Несколько</button>
@@ -90,11 +102,12 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
       <button class="tab" id="addOrder">+ Порядок</button>
       <button class="tab" id="addLie">+ Ложь/правда</button>
     </div>
+    <p class="help">Формулы пишите через $: $x^2$, $\frac{a}{b}$, $\sqrt{x}$</p>
     <div class="questions-list" id="questionsList"></div>
   </div>
 
   <div class="section">
-    <h3>5. Проверка</h3>
+    <h3>6. Проверка</h3>
     <button class="btn primary" id="testBtn">▶ Запустить тест</button>
     <button class="btn" id="resetPreviewBtn">↺ Сбросить</button>
   </div>
@@ -108,7 +121,6 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
 </div>
 
 <script>
-// === КОНФИГУРАЦИЯ ЯЗЫКОВ (ДЛЯ РЕДАКТОРА И ИГРЫ) ===
 const LANGS = {
   ru: { name: "Русский", start: "СТАРТ", lie: "ЛОЖЬ!", accuse: "ОПРОВЕРГНУТЬ", next: "ДАЛЬШЕ", check: "ПРОВЕРИТЬ", time: "ВРЕМЯ", lives: "ЖИЗНИ", truth: "ПРАВДА", false: "ЛОЖЬ", correct: "Верно!", wrong: "Неверно!", over: "Игра окончена", win: "Вы победили!", rebuttal: "Выберите правильное опровержение:", restart: "Играть снова", titleStart: "Начать допрос", statement: "Утверждение", question: "Вопрос", answer: "Ответ", oral: "Произнесите ответ вслух", submit: "Ответить", polyHead: "ПОЛИГРАФ / ЧСС", zoneNormal: "НОРМА", zoneStress: "СТРЕСС", orderHint: "Нажимайте на варианты в правильном порядке" },
   en: { name: "English", start: "START", lie: "LIE!", accuse: "REFUTE", next: "NEXT", check: "CHECK", time: "TIME", lives: "LIVES", truth: "TRUE", false: "FALSE", correct: "Correct!", wrong: "Incorrect!", over: "Game over", win: "You win!", rebuttal: "Choose correct refutation:", restart: "Play again", titleStart: "Start interrogation", statement: "Statement", question: "Question", answer: "Answer", oral: "Say answer aloud", submit: "Submit", polyHead: "POLYGRAPH / HR", zoneNormal: "NORMAL", zoneStress: "STRESS", orderHint: "Click options in correct order" },
@@ -121,17 +133,19 @@ const LANGS = {
 
 const FONTS = { Inter: "Inter,Arial,sans-serif", Orbitron: "Orbitron,Arial,sans-serif", Montserrat: "Montserrat,Arial,sans-serif", "Space Grotesk": "'Space Grotesk',Arial,sans-serif", Georgia: "Georgia,serif" };
 
-// === НАЧАЛЬНОЕ СОСТОЯНИЕ (БЕЗ ПЕТРА I) ===
 const defaults = {
   title: "Допрос подозреваемого", subtitle: "Interrogation & Heart Rate", lang: "ru", font: "Inter", titlePage: true, titleColor: "#d95cff",
+  startBtnText: "Начать допрос", replayBtnText: "Переиграть",
   suspect: { name: "ПОДОЗРЕВАЕМЫЙ", role: "Свидетель" }, bg: "", suspectImg: "",
+  winScreen: { title: "Победа!", text: "Вы успешно прошли допрос!", img: "" },
+  loseScreen: { title: "Поражение", text: "Подозреваемый вас перехитрил.", img: "" },
   theme: { question: "#ffffff", answer: "#d8d9ff", button: "#9a43ff", gameBg: "#050713", panel: "#0d1126" },
   settings: { lives: 3, timer: 0, interval: 1.5, polygraph: true, randomize: false },
   task: { questionSize: 30, answerSize: 17, radius: 18, card: "#0d122b", option: "#151b3b" },
   questions: [
-    { id: 1, type: "single", text: "Чему равен \\sqrt{144}?", options: ["10", "11", "12", "14"], correct: [2], explanation: "12^2 = 144" },
+    { id: 1, type: "single", text: "Чему равен $\\sqrt{144}$?", options: ["10", "11", "12", "14"], correct: [2], explanation: "$12^2 = 144$" },
     { id: 2, type: "multi", text: "Выберите простые числа", options: ["2", "4", "7", "9", "11"], correct: [0, 2, 4], explanation: "4 и 9 составные" },
-    { id: 3, type: "text", text: "Решите: 2x + 5 = 15. x = ?", options: [], correct: ["5"], explanation: "2x=10 => x=5" },
+    { id: 3, type: "text", text: "Решите: $2x + 5 = 15$. $x = $?", options: [], correct: ["5"], explanation: "$2x=10 \\Rightarrow x=5$" },
     { id: 4, type: "oral", text: "Объясните понятие гравитации", options: [], correct: [""], explanation: "Оценка учителем" },
     { id: 5, type: "order", text: "Этапы решения задачи", options: ["Прочитать", "План", "Решение", "Проверка"], correct: [0, 1, 2, 3], explanation: "Стандартный алгоритм" }
   ]
@@ -157,8 +171,13 @@ function initControls() {
 
   $("#bgUpload").onchange = e => { const f = e.target.files[0]; if (f) fileToData(f, x => { state.bg = x; renderAll() }) };
   $("#suspectUpload").onchange = e => { const f = e.target.files[0]; if (f) fileToData(f, x => { state.suspectImg = x; renderAll() }) };
+  $("#winImgUpload").onchange = e => { const f = e.target.files[0]; if (f) fileToData(f, x => { state.winScreen.img = x; renderAll() }) };
+  $("#loseImgUpload").onchange = e => { const f = e.target.files[0]; if (f) fileToData(f, x => { state.loseScreen.img = x; renderAll() }) };
+  
   $("#clearBg").onclick = () => { state.bg = ""; renderAll() };
   $("#clearSuspect").onclick = () => { state.suspectImg = ""; renderAll() };
+  $("#clearWinImg").onclick = () => { state.winScreen.img = ""; renderAll() };
+  $("#clearLoseImg").onclick = () => { state.loseScreen.img = ""; renderAll() };
   
   $("#addSingle").onclick = () => addQ("single"); $("#addMulti").onclick = () => addQ("multi");
   $("#addText").onclick = () => addQ("text"); $("#addOral").onclick = () => addQ("oral");
@@ -182,7 +201,7 @@ function renderQuestions() {
   $("#questionsList").innerHTML = state.questions.map((q, i) => `
     <div class="question-card" data-q="${q.id}">
       <div class="q-head"><b>${i + 1}. ${typeNames[q.type]}</b><button class="mini delq">Удалить</button></div>
-      <div class="field"><label>Текст (поддерживает math: x^2, \\frac{a}{b})</label><textarea class="qtext">${escapeHTML(q.text)}</textarea></div>
+      <div class="field"><label>Текст (формулы через $: $x^2$, $\\frac{a}{b}$)</label><textarea class="qtext">${escapeHTML(q.text)}</textarea></div>
       ${q.type === "lie" ? `<div class="field switch"><input class="qtruth" type="checkbox" ${q.truth ? "checked" : ""}><label>Это ПРАВДА</label></div>` : ""}
       ${["single", "multi", "order"].includes(q.type) ? `<div class="field"><label>Варианты (по строкам)</label><textarea class="qopts">${escapeHTML(q.options.join("\n"))}</textarea></div><div class="field"><label>Номера правильных (через запятую)</label><input class="qcorrect" value="${q.correct.map(x => x + 1).join(",")}"></div>` : ""}
       ${q.type === "text" ? `<div class="field"><label>Правильные ответы (через |)</label><input class="qcorrect" value="${escapeHTML(q.correct.join(" | "))}"></div>` : ""}
@@ -210,14 +229,15 @@ function renderQuestions() {
 function renderAll() {
   $("#bgPreview").src = state.bg || "data:image/svg+xml;charset=utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="100%" height="100%" fill="#0a0d1e"/><text x="50%" y="50%" text-anchor="middle" fill="#666b92" font-family="Arial" font-size="18">Фон не загружен</text></svg>`);
   $("#suspectPreview").src = state.suspectImg || "data:image/svg+xml;charset=utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="100%" height="100%" fill="#0a0d1e"/><text x="50%" y="50%" text-anchor="middle" fill="#666b92" font-family="Arial" font-size="18">Спрайт не загружен</text></svg>`);
+  $("#winImgPreview").src = state.winScreen.img || "data:image/svg+xml;charset=utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="100%" height="100%" fill="#0a0d1e"/><text x="50%" y="50%" text-anchor="middle" fill="#666b92" font-family="Arial" font-size="18">Картинка победы не загружена</text></svg>`);
+  $("#loseImgPreview").src = state.loseScreen.img || "data:image/svg+xml;charset=utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="100%" height="100%" fill="#0a0d1e"/><text x="50%" y="50%" text-anchor="middle" fill="#666b92" font-family="Arial" font-size="18">Картинка поражения не загружена</text></svg>`);
   $("#lang").value = state.lang; $("#font").value = state.font;
   renderQuestions(); renderPreview();
 }
 
-// === ГЕНЕРАТОР ИГРЫ (ИСПРАВЛЕН ДЛЯ GENIALLY) ===
 function buildGameHTML() {
-  const cfg = JSON.stringify(state).replace(/<\/script>/g, "\\u003c/script\\u003e");
-  const langsJSON = JSON.stringify(LANGS).replace(/<\/script>/g, "\\u003c/script\\u003e");
+  const cfg = JSON.stringify(state).replace(/<\/script>/g, "<\\/script>");
+  const langsJSON = JSON.stringify(LANGS).replace(/<\/script>/g, "<\\/script>");
   
   return `<!doctype html><html lang="${state.lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.title)}</title>
 <style>
@@ -265,7 +285,10 @@ function buildGameHTML() {
 .startcard h1{font-size:clamp(32px,6vw,68px);color:${state.titleColor};margin:0 0 10px}
 .timerbar{height:5px;background:#202643;border-radius:5px;overflow:hidden;margin:10px 0}
 .timerfill{height:100%;width:100%;background:${state.theme.button};transform-origin:left;transition:width 1s linear}
-.end{text-align:center;padding:70px 20px}.end h2{font-size:48px;color:${state.titleColor};margin-bottom:20px}
+.end{text-align:center;padding:70px 20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.end h2{font-size:48px;color:${state.titleColor};margin-bottom:20px}
+.end p{font-size:18px;color:#b5b7d5;margin-bottom:30px;max-width:600px}
+.end img{max-width:300px;max-height:300px;border-radius:20px;margin-bottom:30px;object-fit:contain}
 .frac{display:inline-flex;vertical-align:middle;flex-direction:column;text-align:center;margin:0 4px;font-size:0.8em}
 .frac span:first-child{border-bottom:1px solid currentColor;padding:0 3px}
 .frac span:last-child{padding:0 3px}
@@ -279,79 +302,308 @@ function buildGameHTML() {
 const CFG=${cfg};
 const ALL_LANGS=${langsJSON};
 const T=ALL_LANGS[CFG.lang]||ALL_LANGS.ru;
-let qs=CFG.questions.slice();if(CFG.settings.randomize)qs.sort(()=>Math.random()-.5);
-let i=-1,lives=CFG.settings.lives,time=CFG.settings.timer,clock=null,selected=[];
+let qs=CFG.questions.slice();
+if(CFG.settings.randomize)qs.sort(()=>Math.random()-.5);
+let i=-1,lives=CFG.settings.lives,time=CFG.settings.timer,clock=null,selected=[],correctCount=0,totalQuestions=qs.length;
 
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-function math(s){s=esc(s);s=s.replace(/\\\\frac\\{([^{}]+)\\}\\{([^{}]+)\\}/g,'<span class="frac"><span>$1</span><span>$2</span></span>');s=s.replace(/\\^([A-Za-z0-9]+)/g,'<sup>$1</sup>').replace(/_([A-Za-z0-9]+)/g,'<sub>$1</sub>');s=s.replace(/√\\(([^)]+)\\)/g,'√<span class="radicand">$1</span>');return s}
 
-function start(){i=-1;lives=CFG.settings.lives;time=CFG.settings.timer;next();document.querySelector(".start")?.remove()}
-function renderStart(){document.querySelector("#root").innerHTML=CFG.titlePage?'<div class="start"><div class="startcard"><h1>'+esc(CFG.title)+'</h1><p class="sub">'+esc(CFG.subtitle)+'</p><p style="margin-top:15px;color:#9ca2c9">'+esc(CFG.suspect.name)+' · '+esc(CFG.suspect.role)+'</p><button class="mainbtn" style="margin-top:25px" onclick="start()">'+T.titleStart+'</button></div></div>':'<div></div>';if(!CFG.titlePage)start()}
+function renderMath(s){
+  s=esc(s);
+  // Находим все формулы между $ и рендерим их
+  s=s.replace(/\\$([^$]+)\\$/g,(match,formula)=>{
+    let f=formula;
+    f=f.replace(/\\\\frac\\{([^{}]+)\\}\\{([^{}]+)\\}/g,'<span class="frac"><span>$1</span><span>$2</span></span>');
+    f=f.replace(/\\^([A-Za-z0-9]+)/g,'<sup>$1</sup>');
+    f=f.replace(/_([A-Za-z0-9]+)/g,'<sub>$1</sub>');
+    f=f.replace(/\\\\sqrt\\{([^}]+)\\}/g,'√<span class="radicand">$1</span>');
+    f=f.replace(/\\\\sqrt\\(([^)]+)\\)/g,'√<span class="radicand">$1</span>');
+    return f;
+  });
+  return s;
+}
 
-function next(){clearInterval(clock);i++;selected=[];if(i>=qs.length){end(true);return}time=CFG.settings.timer;renderQuestion();if(CFG.settings.timer>0){clock=setInterval(()=>{time--;updateTimer();if(time<=0){clearInterval(clock);wrong(true)}},1000)}}
-function updateTimer(){const el=document.querySelector("#timerfill");if(el)el.style.width=Math.max(0,time/CFG.settings.timer*100)+"%";const tt=document.querySelector("#timerText");if(tt)tt.textContent=time+"s"}
+function start(){i=-1;lives=CFG.settings.lives;time=CFG.settings.timer;correctCount=0;selected=[];next();document.querySelector(".start")?.remove()}
+
+function renderStart(){
+  const startBtnText=CFG.startBtnText||T.titleStart;
+  document.querySelector("#root").innerHTML=CFG.titlePage?'<div class="start"><div class="startcard"><h1>'+esc(CFG.title)+'</h1><p class="sub">'+esc(CFG.subtitle)+'</p><p style="margin-top:15px;color:#9ca2c9">'+esc(CFG.suspect.name)+' · '+esc(CFG.suspect.role)+'</p><button class="mainbtn" style="margin-top:25px" onclick="start()">'+esc(startBtnText)+'</button></div></div>':'<div></div>';
+  if(!CFG.titlePage)start();
+}
+
+function next(){
+  clearInterval(clock);
+  i++;
+  selected=[];
+  if(i>=qs.length){
+    end(correctCount>totalQuestions*0.5);
+    return;
+  }
+  time=CFG.settings.timer;
+  renderQuestion();
+  if(CFG.settings.timer>0){
+    clock=setInterval(()=>{
+      time--;
+      updateTimer();
+      if(time<=0){
+        clearInterval(clock);
+        wrong(true);
+      }
+    },1000);
+  }
+}
+
+function updateTimer(){
+  const el=document.querySelector("#timerfill");
+  if(el)el.style.width=Math.max(0,time/CFG.settings.timer*100)+"%";
+  const tt=document.querySelector("#timerText");
+  if(tt)tt.textContent=time+"s";
+}
 
 function poly(lie){
   const needle=document.querySelector(".needle"),red=document.querySelector(".light.red"),green=document.querySelector(".light.green"),svg=document.querySelector(".chart svg"),path=document.querySelector("#wave"),zoneTxt=document.querySelector("#zoneText");
   if(!needle)return;
   needle.style.left=(lie?88:24)+"%";
-  red.classList.toggle("on",lie);green.classList.toggle("on",!lie);
+  red.classList.toggle("on",lie);
+  green.classList.toggle("on",!lie);
   if(zoneTxt)zoneTxt.textContent=lie?T.zoneStress:T.zoneNormal;
-  if(svg){svg.classList.remove("anim-slow","anim-fast");void svg.offsetWidth;svg.classList.add(lie?"anim-fast":"anim-slow")}
-  let d="M0 50";for(let x=0;x<=1000;x+=10){let amp=lie?24:7;let freq=lie?7:18;let y=50+Math.sin(x/freq)*amp+(Math.random()-0.5)*(lie?8:2);d+=" L"+x+" "+y}
+  if(svg){
+    svg.classList.remove("anim-slow","anim-fast");
+    void svg.offsetWidth;
+    svg.classList.add(lie?"anim-fast":"anim-slow");
+  }
+  let d="M0 50";
+  for(let x=0;x<=1000;x+=10){
+    let amp=lie?24:7;
+    let freq=lie?7:18;
+    let y=50+Math.sin(x/freq)*amp+(Math.random()-0.5)*(lie?8:2);
+    d+=" L"+x+" "+y;
+  }
   if(path)path.setAttribute("d",d);
 }
 
 function renderQuestion(){
   const q=qs[i],isLie=q.type==="lie";
-  document.querySelector("#root").innerHTML='<div class="top"><div><div class="title">'+esc(CFG.title)+'</div><div class="sub">'+esc(CFG.subtitle)+'</div></div><div class="hud"><span class="badge">'+T.lives+': '+'❤'.repeat(Math.max(0,lives))+'</span>'+(CFG.settings.timer>0?'<span class="badge">'+T.time+': <span id="timerText">'+time+'s</span></span>':'')+'</div></div><div class="game"><div><div class="suspect">'+(CFG.suspectImg?'<img src="'+CFG.suspectImg+'" onerror="this.style.display=\\'none\\'">':'')+'<div><div class="who">'+esc(CFG.suspect.name)+'</div><div class="role">'+esc(CFG.suspect.role)+'</div></div></div><div class="poly"><div class="polyhead"><span>'+T.polyHead+'</span><span id="zoneText">'+T.zoneNormal+'</span></div><div class="zone"><span class="needle"></span></div><div class="lights"><span class="light green"></span><span class="light red"></span></div><div class="chart"><svg viewBox="0 0 1000 100" preserveAspectRatio="none" class="anim-slow"><path id="wave" d="M0 50 L1000 50" fill="none" stroke="#7e8bff" stroke-width="3"/></svg></div></div></div><div class="task"><div class="label">'+(isLie?T.statement:T.question)+' · '+(i+1)+' / '+qs.length+'</div><div class="question">'+math(q.text)+'</div><div id="answerArea"></div><div class="actions" id="actions"></div><div class="notice" id="notice"></div></div></div>'+(CFG.settings.timer>0?'<div class="timerbar"><div id="timerfill" class="timerfill"></div></div>':'');
-  poly(isLie&&!q.truth);setupAnswer(q);
+  document.querySelector("#root").innerHTML='<div class="top"><div><div class="title">'+esc(CFG.title)+'</div><div class="sub">'+esc(CFG.subtitle)+'</div></div><div class="hud"><span class="badge">'+T.lives+': '+'❤'.repeat(Math.max(0,lives))+'</span>'+(CFG.settings.timer>0?'<span class="badge">'+T.time+': <span id="timerText">'+time+'s</span></span>':'')+'</div></div><div class="game"><div><div class="suspect">'+(CFG.suspectImg?'<img src="'+CFG.suspectImg+'" onerror="this.style.display=\\'none\\'">':'')+'<div><div class="who">'+esc(CFG.suspect.name)+'</div><div class="role">'+esc(CFG.suspect.role)+'</div></div></div><div class="poly"><div class="polyhead"><span>'+T.polyHead+'</span><span id="zoneText">'+T.zoneNormal+'</span></div><div class="zone"><span class="needle"></span></div><div class="lights"><span class="light green"></span><span class="light red"></span></div><div class="chart"><svg viewBox="0 0 1000 100" preserveAspectRatio="none" class="anim-slow"><path id="wave" d="M0 50 L1000 50" fill="none" stroke="#7e8bff" stroke-width="3"/></svg></div></div></div><div class="task"><div class="label">'+(isLie?T.statement:T.question)+' · '+(i+1)+' / '+qs.length+'</div><div class="question">'+renderMath(q.text)+'</div><div id="answerArea"></div><div class="actions" id="actions"></div><div class="notice" id="notice"></div></div></div>'+(CFG.settings.timer>0?'<div class="timerbar"><div id="timerfill" class="timerfill"></div></div>':'');
+  poly(isLie&&!q.truth);
+  setupAnswer(q);
 }
 
 function setupAnswer(q){
   const area=document.querySelector("#answerArea"),actions=document.querySelector("#actions"),notice=document.querySelector("#notice");
-  if(q.type==="lie"){area.innerHTML='<div style="color:#b5b7d5">'+(q.truth?T.truth:T.false)+'</div>';actions.innerHTML='<button class="mainbtn liebtn" onclick="judgeLie()">'+T.lie+'</button><button class="mainbtn secondary" onclick="judgeTruth()">'+T.truth+'</button>';return}
-  if(q.type==="oral"){area.innerHTML='<div style="color:#b5b7d5">'+T.oral+'</div>';actions.innerHTML='<button class="mainbtn" onclick="oralAnswer()">'+T.submit+'</button>';return}
-  if(q.type==="text"){area.innerHTML='<input id="textAnswer" style="font-size:'+CFG.task.answerSize+'px;width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;outline:none" placeholder="'+esc(T.answer)+'">';actions.innerHTML='<button class="mainbtn" onclick="checkText()">'+T.check+'</button>';return}
-  if(q.type==="order"){notice.textContent=T.orderHint;area.innerHTML='<div class="options">'+q.options.map((x,j)=>'<button class="option" data-j="'+j+'" onclick="pickOrder('+j+')"><span class="ord-num" style="display:inline-block;width:20px;font-weight:bold;color:#666"></span>'+math(x)+'</button>').join('')+'</div>';actions.innerHTML='<button class="mainbtn" onclick="checkChoice()">'+T.check+'</button>';return}
-  area.innerHTML='<div class="options">'+q.options.map((x,j)=>'<button class="option" data-j="'+j+'" onclick="pick('+j+')">'+math(x)+'</button>').join('')+'</div>';
+  if(q.type==="lie"){
+    area.innerHTML='<div style="color:#b5b7d5">'+(q.truth?T.truth:T.false)+'</div>';
+    actions.innerHTML='<button class="mainbtn liebtn" onclick="judgeLie()">'+T.lie+'</button><button class="mainbtn secondary" onclick="judgeTruth()">'+T.truth+'</button>';
+    return;
+  }
+  if(q.type==="oral"){
+    area.innerHTML='<div style="color:#b5b7d5">'+T.oral+'</div>';
+    actions.innerHTML='<button class="mainbtn" onclick="oralAnswer()">'+T.submit+'</button>';
+    return;
+  }
+  if(q.type==="text"){
+    area.innerHTML='<input id="textAnswer" style="font-size:'+CFG.task.answerSize+'px;width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;outline:none" placeholder="'+esc(T.answer)+'">';
+    actions.innerHTML='<button class="mainbtn" onclick="checkText()">'+T.check+'</button>';
+    return;
+  }
+  if(q.type==="order"){
+    notice.textContent=T.orderHint;
+    area.innerHTML='<div class="options">'+q.options.map((x,j)=>'<button class="option" data-j="'+j+'" onclick="pickOrder('+j+')"><span class="ord-num" style="display:inline-block;width:20px;font-weight:bold;color:#666"></span>'+renderMath(x)+'</button>').join('')+'</div>';
+    actions.innerHTML='<button class="mainbtn" onclick="checkChoice()">'+T.check+'</button>';
+    return;
+  }
+  area.innerHTML='<div class="options">'+q.options.map((x,j)=>'<button class="option" data-j="'+j+'" onclick="pick('+j+')">'+renderMath(x)+'</button>').join('')+'</div>';
   actions.innerHTML='<button class="mainbtn" onclick="checkChoice()">'+T.check+'</button>';
-  if(q.type==="multi")notice.textContent="✓ "+T.lives; 
+  if(q.type==="multi")notice.textContent="Можно выбрать несколько вариантов";
 }
 
-function pick(j){const q=qs[i];if(q.type==="single")selected=[j];else selected=selected.includes(j)?selected.filter(x=>x!==j):[...selected,j];document.querySelectorAll(".option").forEach((b,k)=>b.classList.toggle("selected",selected.includes(k)))}
-function pickOrder(j){if(selected.includes(j))return;selected.push(j);const btns=document.querySelectorAll(".option");btns[j].classList.add("selected");btns[j].querySelector(".ord-num").textContent=selected.length+". "}
-function markCorrect(indices){document.querySelectorAll(".option").forEach((b,j)=>{b.classList.toggle("correct",indices.includes(j));b.classList.remove("selected")})}
+function pick(j){
+  const q=qs[i];
+  if(q.type==="single")selected=[j];
+  else selected=selected.includes(j)?selected.filter(x=>x!==j):[...selected,j];
+  document.querySelectorAll(".option").forEach((b,k)=>b.classList.toggle("selected",selected.includes(k)));
+}
 
-function wrong(timeout=false){lives--;poly(true);document.querySelectorAll(".option").forEach((b,j)=>{if(selected.includes(j))b.classList.add("wrong")});const n=document.querySelector("#notice");if(n)n.textContent=T.wrong+(timeout?" — "+T.time:"");if(lives<=0){setTimeout(()=>end(false),700);return}setTimeout(next,Math.max(0,CFG.settings.interval*1000))}
-function good(){poly(false);const n=document.querySelector("#notice");if(n)n.textContent=T.correct;setTimeout(next,Math.max(0,CFG.settings.interval*1000))}
-function checkChoice(){const q=qs[i],a=[...selected],c=[...q.correct],ok=JSON.stringify(a)===JSON.stringify(c);if(ok){markCorrect(c);good()}else wrong(false)}
-function checkText(){const q=qs[i],v=(document.querySelector("#textAnswer").value||"").trim().toLowerCase(),ok=q.correct.some(x=>v===String(x).trim().toLowerCase());if(ok)good();else{document.querySelector("#textAnswer").style.borderColor="#ff4d78";wrong(false)}}
-function oralAnswer(){const n=document.querySelector("#notice");if(n)n.textContent=T.correct+" "+(qs[i].explanation||"");poly(false);setTimeout(next,Math.max(0,CFG.settings.interval*1000))}
-function judgeLie(){const q=qs[i];if(q.truth){poly(false);wrong(false);return}poly(true);document.querySelector("#zoneText").textContent=T.zoneStress;document.querySelector("#actions").innerHTML='<button class="mainbtn accuse" onclick="showRebuttal()">'+T.accuse+'</button>';document.querySelector("#notice").textContent=T.correct}
-function judgeTruth(){const q=qs[i];if(q.truth){poly(false);good()}else{poly(true);wrong(false)}}
-function showRebuttal(){const q=qs[i],a=document.querySelector("#answerArea");a.innerHTML='<div class="label">'+T.rebuttal+'</div><div class="options">'+q.rebuttals.map((x,j)=>'<button class="option" onclick="rebut('+j+')">'+esc(x)+'</button>').join('')+'</div>';document.querySelector("#actions").innerHTML=""}
-function rebut(j){const q=qs[i];if(j===q.correctRebuttal){document.querySelector("#notice").textContent=T.correct+" "+(q.explanation||"");poly(false);setTimeout(next,Math.max(0,CFG.settings.interval*1000))}else{document.querySelector("#notice").textContent=T.wrong;wrong(false)}}
-function end(win){document.querySelector("#root").innerHTML='<div class="end"><h2>'+(win?T.win:T.over)+'</h2><button class="mainbtn" onclick="location.reload()">'+T.restart+'</button></div>'}
+function pickOrder(j){
+  if(selected.includes(j))return;
+  selected.push(j);
+  const btns=document.querySelectorAll(".option");
+  btns[j].classList.add("selected");
+  btns[j].querySelector(".ord-num").textContent=selected.length+". ";
+}
 
-window.addEventListener("message",e=>{if(e.data?.cmd==="start")start();if(e.data?.cmd==="reset")renderStart()});
+function markCorrect(indices){
+  document.querySelectorAll(".option").forEach((b,j)=>{
+    b.classList.toggle("correct",indices.includes(j));
+    b.classList.remove("selected");
+  });
+}
+
+function wrong(timeout=false){
+  lives--;
+  poly(true);
+  document.querySelectorAll(".option").forEach((b,j)=>{
+    if(selected.includes(j))b.classList.add("wrong");
+  });
+  const n=document.querySelector("#notice");
+  if(n)n.textContent=T.wrong+(timeout?" — "+T.time:"");
+  if(lives<=0){
+    setTimeout(()=>end(false),700);
+    return;
+  }
+  setTimeout(next,Math.max(0,CFG.settings.interval*1000));
+}
+
+function good(){
+  correctCount++;
+  poly(false);
+  const n=document.querySelector("#notice");
+  if(n)n.textContent=T.correct;
+  setTimeout(next,Math.max(0,CFG.settings.interval*1000));
+}
+
+function checkChoice(){
+  const q=qs[i],a=[...selected],c=[...q.correct],ok=JSON.stringify(a)===JSON.stringify(c);
+  if(ok){
+    markCorrect(c);
+    good();
+  }else{
+    wrong(false);
+  }
+}
+
+function checkText(){
+  const q=qs[i],v=(document.querySelector("#textAnswer").value||"").trim().toLowerCase(),ok=q.correct.some(x=>v===String(x).trim().toLowerCase());
+  if(ok){
+    good();
+  }else{
+    document.querySelector("#textAnswer").style.borderColor="#ff4d78";
+    wrong(false);
+  }
+}
+
+function oralAnswer(){
+  const n=document.querySelector("#notice");
+  if(n)n.textContent=T.correct+" "+(qs[i].explanation||"");
+  correctCount++;
+  poly(false);
+  setTimeout(next,Math.max(0,CFG.settings.interval*1000));
+}
+
+function judgeLie(){
+  const q=qs[i];
+  if(q.truth){
+    poly(false);
+    wrong(false);
+    return;
+  }
+  poly(true);
+  document.querySelector("#zoneText").textContent=T.zoneStress;
+  document.querySelector("#actions").innerHTML='<button class="mainbtn accuse" onclick="showRebuttal()">'+T.accuse+'</button>';
+  document.querySelector("#notice").textContent=T.correct;
+}
+
+function judgeTruth(){
+  const q=qs[i];
+  if(q.truth){
+    poly(false);
+    good();
+  }else{
+    poly(true);
+    wrong(false);
+  }
+}
+
+function showRebuttal(){
+  const q=qs[i],a=document.querySelector("#answerArea");
+  a.innerHTML='<div class="label">'+T.rebuttal+'</div><div class="options">'+q.rebuttals.map((x,j)=>'<button class="option" onclick="rebut('+j+')">'+esc(x)+'</button>').join('')+'</div>';
+  document.querySelector("#actions").innerHTML="";
+}
+
+function rebut(j){
+  const q=qs[i];
+  if(j===q.correctRebuttal){
+    document.querySelector("#notice").textContent=T.correct+" "+(q.explanation||"");
+    correctCount++;
+    poly(false);
+    setTimeout(next,Math.max(0,CFG.settings.interval*1000));
+  }else{
+    document.querySelector("#notice").textContent=T.wrong;
+    wrong(false);
+  }
+}
+
+function end(win){
+  const replayBtnText=CFG.replayBtnText||T.restart;
+  const screen=win?CFG.winScreen:CFG.loseScreen;
+  const title=screen.title||(win?T.win:T.over);
+  const text=screen.text||"";
+  const img=screen.img||"";
+  document.querySelector("#root").innerHTML='<div class="end">'+(img?'<img src="'+img+'" onerror="this.style.display=\\'none\\'">':'')+'<h2>'+esc(title)+'</h2>'+(text?'<p>'+esc(text)+'</p>':'')+'<p style="color:#9ca2c9">'+correctCount+' / '+totalQuestions+' правильных ответов</p><button class="mainbtn" onclick="location.reload()">'+esc(replayBtnText)+'</button></div>';
+}
+
+window.addEventListener("message",e=>{
+  if(e.data?.cmd==="start")start();
+  if(e.data?.cmd==="reset")renderStart();
+});
+
 renderStart();
 <\/script></body></html>`;
 }
 
 function renderPreview() { const html = buildGameHTML(); $("#preview").srcdoc = html }
 function postPreview(msg) { $("#preview").contentWindow?.postMessage(msg, "*") }
-function saveProject() { const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = (state.title || "project").replace(/[^\wа-яё-]+/gi, "_") + ".json"; a.click(); URL.revokeObjectURL(a.href) }
-function loadProject(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { try { state = JSON.parse(r.result); renderAll() } catch { alert("Ошибка JSON") } }; r.readAsText(f); e.target.value = "" }
-function downloadHTML() { const html = buildGameHTML(); const blob = new Blob([html], { type: "text/html;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = (state.title || "game").replace(/[^\wа-яё-]+/gi, "_") + ".html"; a.click(); URL.revokeObjectURL(a.href) }
-async function copyGenially() {
-  const html = buildGameHTML();
-  // Для Genially важно использовать srcdoc и фиксированную высоту
-  const code = `<iframe title="${escapeHTML(state.title)}" style="width:100%;height:800px;border:0;border-radius:18px;background:#050713" srcdoc="${html.replace(/"/g, "&quot;").replace(/#/g, "%23")}"></iframe>`;
-  try { await navigator.clipboard.writeText(code); alert("Код скопирован! Вставьте его в Genially через блок 'HTML Code' (Вставка -> HTML).") } catch { prompt("Скопируйте код вручную:", code) }
+
+function saveProject() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (state.title || "project").replace(/[^\wа-яё-]+/gi, "_") + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
-initControls(); renderAll();
+function loadProject(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      state = JSON.parse(r.result);
+      renderAll();
+    } catch {
+      alert("Ошибка JSON");
+    }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+}
+
+function downloadHTML() {
+  const html = buildGameHTML();
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (state.title || "game").replace(/[^\wа-яё-]+/gi, "_") + ".html";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function copyGenially() {
+  const html = buildGameHTML();
+  // Для Genially используем data URL вместо srcdoc для лучшей совместимости
+  const encodedHTML = btoa(unescape(encodeURIComponent(html)));
+  const code = `<iframe title="${escapeHTML(state.title)}" style="width:100%;height:800px;border:0;border-radius:18px;background:#050713" src="data:text/html;base64,${encodedHTML}"></iframe>`;
+  try {
+    await navigator.clipboard.writeText(code);
+    alert("Код скопирован! Вставьте его в Genially через блок 'HTML Code' (Вставка -> HTML).");
+  } catch {
+    prompt("Скопируйте код вручную:", code);
+  }
+}
+
+initControls();
+renderAll();
 </script>
 </body>
 </html>
