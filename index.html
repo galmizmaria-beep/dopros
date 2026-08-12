@@ -3,22 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Детектор лжи</title>
+<title>Детектор лжи - Редактор</title>
+<!-- Подключаем KaTeX для превью формул в редакторе -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <style>
 :root{--bg:#050712;--panel:#0c1024;--line:#262b55;--text:#f6f5ff;--muted:#a9add0;--purple:#9b4dff;--green:#31e6a2;--red:#ff4d78;--radius:18px;--font:Inter,Arial,sans-serif}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 10%,#17104b 0,#080a17 32%,#03040b 75%);color:var(--text);font-family:var(--font);min-height:100vh}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 10%,#17104b 0,#080a17 32%,#03040b 75%);color:var(--text);font-family:var(--font);min-height:100vh;font-size:14px}
 .app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
 .topbar{height:72px;display:flex;align-items:center;gap:20px;padding:0 24px;border-bottom:1px solid #1c2040;background:rgba(4,6,18,.86);backdrop-filter:blur(18px);position:sticky;top:0;z-index:20}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;min-width:220px}.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#8c32ff,#3d8dff);box-shadow:0 0 25px #8d36ff66;display:grid;place-items:center}.logo:after{content:"◆";font-size:17px;color:white}
-.top-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#0d1128;color:#f8f7ff;border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .2s}.btn:hover{border-color:#6f58c9;transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,#9c42ff,#6538ff);border:0;box-shadow:0 8px 30px #7a38ff33}.btn.success{background:#31e6a2!important;color:#050712!important;border-color:#31e6a2!important;font-weight:bold}
-.workspace{display:grid;grid-template-columns:minmax(430px,520px) 1fr;gap:18px;padding:18px;max-width:1800px;width:100%;margin:auto}
-.editor{background:rgba(9,12,29,.92);border:1px solid #202650;border-radius:20px;overflow:auto;max-height:calc(100vh - 108px);box-shadow:0 20px 80px #0006}.preview-wrap{min-width:0}.preview-shell{position:sticky;top:90px;height:calc(100vh - 108px);min-height:650px;background:#070916;border:1px solid #202650;border-radius:20px;overflow:hidden;box-shadow:0 20px 80px #0008}
-.section{padding:17px 18px;border-bottom:1px solid #1d2241}.section h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 12px;color:#d8d5ff}.section p.help{font-size:11px;line-height:1.5;color:var(--muted);margin:7px 0 0}.field{margin:10px 0}.field label{display:flex;justify-content:space-between;gap:10px;color:#c7c9e7;font-size:12px;margin-bottom:6px}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px solid #252b52;border-radius:10px;padding:10px;outline:none}input:focus,textarea:focus,select:focus{border-color:#8a52ff;box-shadow:0 0 0 3px #8a52ff14}textarea{min-height:78px;resize:vertical}.color{height:42px;padding:4px}
-.switch{display:flex;align-items:center;gap:9px}.switch input{width:18px;height:18px;accent-color:#a84dff}.tabs{display:flex;gap:6px;overflow:auto;margin-bottom:10px}.tab{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#090d20;color:#bfc2df;white-space:nowrap;cursor:pointer}.tab.active{background:#5b2bc4;color:#fff;border-color:#8e55ff}
-.upload{display:grid;grid-template-columns:1fr auto;gap:8px}.file-label{display:block;padding:10px;border:1px dashed #3b3f6a;border-radius:10px;text-align:center;color:#b9bbdb;background:#080b1d;cursor:pointer}.file-label input{display:none}
-.asset-preview{width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #262c50;background:#0b0e20;margin-top:8px}
-.question-card{border:1px solid #242a50;border-radius:14px;padding:12px;background:#090d20;margin:10px 0}.q-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.q-head b{font-size:12px}.mini{padding:7px 9px;border-radius:8px;border:1px solid #2a2f55;background:#10142c;color:#d8d9ee;cursor:pointer}.questions-list{max-height:400px;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;min-width:220px;color:#fff}.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#8c32ff,#3d8dff);box-shadow:0 0 25px #8d36ff66;display:grid;place-items:center}.logo:after{content:"◆";font-size:17px;color:white}
+.top-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#0d1128;color:#f8f7ff;border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .2s;font-size:13px}.btn:hover{border-color:#6f58c9;transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,#9c42ff,#6538ff);border:0;box-shadow:0 8px 30px #7a38ff33}.btn.success{background:#31e6a2!important;color:#050712!important;border-color:#31e6a2!important;font-weight:bold}
+.workspace{display:grid;grid-template-columns:minmax(450px,550px) 1fr;gap:18px;padding:18px;max-width:1900px;width:100%;margin:auto}
+.editor{background:rgba(9,12,29,.92);border:1px solid #202650;border-radius:20px;overflow:auto;max-height:calc(100vh - 108px);box-shadow:0 20px 80px #0006;padding-bottom:50px}.preview-wrap{min-width:0}.preview-shell{position:sticky;top:90px;height:calc(100vh - 108px);min-height:650px;background:#070916;border:1px solid #202650;border-radius:20px;overflow:hidden;box-shadow:0 20px 80px #0008}
+.section{padding:17px 18px;border-bottom:1px solid #1d2241}.section h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 12px;color:#d8d5ff}.section p.help{font-size:11px;line-height:1.5;color:var(--muted);margin:7px 0 0}.field{margin:10px 0}.field label{display:flex;justify-content:space-between;gap:10px;color:#c7c9e7;font-size:12px;margin-bottom:6px}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px solid #252b52;border-radius:10px;padding:10px;outline:none;font-family:inherit}input:focus,textarea:focus,select:focus{border-color:#8a52ff;box-shadow:0 0 0 3px #8a52ff14}textarea{min-height:78px;resize:vertical}.color{height:42px;padding:4px}
+.switch{display:flex;align-items:center;gap:9px}.switch input{width:18px;height:18px;accent-color:#a84dff}.tabs{display:flex;gap:6px;overflow:auto;margin-bottom:10px;flex-wrap:wrap}.tab{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#090d20;color:#bfc2df;white-space:nowrap;cursor:pointer;font-size:12px}.tab.active{background:#5b2bc4;color:#fff;border-color:#8e55ff}
+.upload{display:grid;grid-template-columns:1fr auto;gap:8px}.file-label{display:block;padding:10px;border:1px dashed #3b3f6a;border-radius:10px;text-align:center;color:#b9bbdb;background:#080b1d;cursor:pointer;font-size:12px}.file-label input{display:none}
+.asset-preview{width:100%;height:100px;object-fit:cover;border-radius:12px;border:1px solid #262c50;background:#0b0e20;margin-top:8px}
+.question-card{border:1px solid #242a50;border-radius:14px;padding:12px;background:#090d20;margin:10px 0}.q-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.q-head b{font-size:12px;color:#fff}.mini{padding:5px 8px;border-radius:6px;border:1px solid #2a2f55;background:#10142c;color:#d8d9ee;cursor:pointer;font-size:11px}.questions-list{max-height:500px;overflow:auto;padding-right:5px}
 .preview-frame{width:100%;height:100%;border:0;background:#050611}.footer-credit{text-align:center;color:#71769d;font-size:11px;padding:14px}
 @media(max-width:1100px){.workspace{grid-template-columns:1fr}.preview-shell{position:relative;top:auto;height:760px}.editor{max-height:none}.brand{min-width:auto}}
 </style>
@@ -29,8 +32,8 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
   <div class="brand"><span class="logo"></span><span>Детектор лжи</span></div>
   <div class="top-actions">
     <button class="btn" id="newBtn">＋ Новый</button>
-    <button class="btn" id="saveBtn">💾 Сохранить</button>
-    <button class="btn" id="loadBtn">📂 Загрузить</button>
+    <button class="btn" id="saveBtn">💾 Сохранить JSON</button>
+    <button class="btn" id="loadBtn">📂 Загрузить JSON</button>
     <button class="btn" id="copyBtn">⧉ Код для Genially</button>
     <button class="btn primary" id="downloadBtn">↓ Скачать HTML</button>
     <input id="loadInput" type="file" accept=".json,application/json" hidden>
@@ -46,8 +49,14 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
       <div class="field"><label>Язык интерфейса ИГРЫ</label><select id="lang" data-bind="lang"></select></div>
       <div class="field"><label>Шрифт</label><select id="font" data-bind="font"></select></div>
     </div>
+    <div class="row4">
+      <div class="field"><label>Размер заголовка (px)</label><input type="number" min="20" max="100" data-bind="sizes.title"></div>
+      <div class="field"><label>Размер вопроса (px)</label><input type="number" min="12" max="72" data-bind="sizes.question"></div>
+      <div class="field"><label>Размер ответа (px)</label><input type="number" min="10" max="48" data-bind="sizes.answer"></div>
+      <div class="field"><label>Радиус скругления (px)</label><input type="number" min="0" max="50" data-bind="sizes.radius"></div>
+    </div>
     <div class="row3">
-      <div class="field"><label>Цвет названия</label><input type="color" class="color" id="titleColor" data-bind="titleColor"></div>
+      <div class="field"><label>Цвет названия</label><input type="color" class="color" id="titleColor" data-bind="theme.titleColor"></div>
       <div class="field"><label>Цвет вопроса</label><input type="color" class="color" id="questionColor" data-bind="theme.question"></div>
       <div class="field"><label>Цвет ответа</label><input type="color" class="color" id="answerColor" data-bind="theme.answer"></div>
     </div>
@@ -57,8 +66,10 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
       <div class="field"><label>Цвет панелей</label><input type="color" class="color" id="panelColor" data-bind="theme.panel"></div>
     </div>
     <div class="field switch"><input type="checkbox" id="titlePage" data-bind="titlePage"><label for="titlePage">Показывать титульный лист</label></div>
-    <div class="field"><label>Текст кнопки "Старт"</label><input data-bind="startBtnText" placeholder="Играть"></div>
-    <div class="field"><label>Текст кнопки "Переиграть"</label><input data-bind="replayBtnText" placeholder="Переиграть"></div>
+    <div class="row">
+        <div class="field"><label>Текст кнопки "Старт"</label><input data-bind="texts.start" placeholder="Играть"></div>
+        <div class="field"><label>Текст кнопки "Переиграть"</label><input data-bind="texts.replay" placeholder="Переиграть"></div>
+    </div>
   </div>
 
   <div class="section">
@@ -67,19 +78,29 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
     <div class="field"><label>Фон</label><div class="upload"><label class="file-label">Загрузить фон<input type="file" accept="image/*" id="bgUpload"></label><button class="mini" id="clearBg">Очистить</button></div><img class="asset-preview" id="bgPreview" alt=""></div>
     
     <div class="row3">
-        <div class="field"><label>Анимация: Покой</label><select data-bind="anim.idle"><option value="none">Нет</option><option value="breathe">Дыхание</option><option value="float">Парение</option><option value="shake">Дрожь</option></select></div>
-        <div class="field"><label>Анимация: Верно</label><select data-bind="anim.correct"><option value="none">Нет</option><option value="jump">Прыжок</option><option value="glow">Свечение</option><option value="spin">Вращение</option></select></div>
-        <div class="field"><label>Анимация: Неверно</label><select data-bind="anim.wrong"><option value="none">Нет</option><option value="shake">Тряска</option><option value="fade">Бледность</option><option value="tilt">Наклон</option></select></div>
+        <div class="field"><label>Анимация: Покой</label><select data-bind="anim.idle">
+            <option value="none">Нет</option><option value="breathe">Дыхание</option><option value="float">Парение</option><option value="pulse">Пульсация</option><option value="sway">Покачивание</option><option value="glitch">Глитч</option><option value="shadow">Тень</option>
+        </select></div>
+        <div class="field"><label>Анимация: Верно</label><select data-bind="anim.correct">
+            <option value="none">Нет</option><option value="jump">Прыжок</option><option value="glow">Свечение</option><option value="spin">Вращение</option><option value="bounce">Отскок</option><option value="flash">Вспышка</option><option value="grow">Увеличение</option><option value="confetti">Конфетти (CSS)</option>
+        </select></div>
+        <div class="field"><label>Анимация: Неверно</label><select data-bind="anim.wrong">
+            <option value="none">Нет</option><option value="shake">Тряска</option><option value="fade">Бледность</option><option value="tilt">Наклон</option><option value="shrink">Уменьшение</option><option value="blur">Размытие</option><option value="invert">Инверсия</option><option value="fall">Падение</option>
+        </select></div>
     </div>
   </div>
 
   <div class="section">
     <h3>3. Экраны победы и поражения</h3>
-    <div class="field"><label>Заголовок победы</label><input data-bind="winScreen.title"></div>
-    <div class="field"><label>Текст победы</label><textarea data-bind="winScreen.text"></textarea></div>
+    <div class="row">
+        <div class="field"><label>Заголовок победы</label><input data-bind="winScreen.title"></div>
+        <div class="field"><label>Текст победы</label><input data-bind="winScreen.text"></div>
+    </div>
     <div class="field"><label>Картинка победы</label><div class="upload"><label class="file-label">Загрузить<input type="file" accept="image/*" id="winImgUpload"></label><button class="mini" id="clearWinImg">X</button></div><img class="asset-preview" id="winImgPreview" alt=""></div>
-    <div class="field"><label>Заголовок поражения</label><input data-bind="loseScreen.title"></div>
-    <div class="field"><label>Текст поражения</label><textarea data-bind="loseScreen.text"></textarea></div>
+    <div class="row">
+        <div class="field"><label>Заголовок поражения</label><input data-bind="loseScreen.title"></div>
+        <div class="field"><label>Текст поражения</label><input data-bind="loseScreen.text"></div>
+    </div>
     <div class="field"><label>Картинка поражения</label><div class="upload"><label class="file-label">Загрузить<input type="file" accept="image/*" id="loseImgUpload"></label><button class="mini" id="clearLoseImg">X</button></div><img class="asset-preview" id="loseImgPreview" alt=""></div>
   </div>
 
@@ -95,22 +116,24 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
   </div>
 
   <div class="section">
-    <h3>5. Вопросы (формулы: $x^2$)</h3>
-    <div class="tabs">
-      <button class="tab active" id="addSingle">+ Один</button>
-      <button class="tab" id="addMulti">+ Много</button>
-      <button class="tab" id="addText">+ Ввод</button>
-      <button class="tab" id="addOral">+ Устный</button>
-      <button class="tab" id="addOrder">+ Порядок</button>
-      <button class="tab" id="addLie">+ Ложь</button>
+    <h3>5. Вопросы (LaTeX: $x^2$, $\frac{a}{b}$)</h3>
+    <div class="tabs" id="qTabs">
+      <button class="tab active" data-type="single">+ Один</button>
+      <button class="tab" data-type="multi">+ Много</button>
+      <button class="tab" data-type="text">+ Ввод</button>
+      <button class="tab" data-type="oral">+ Устный</button>
+      <button class="tab" data-type="order">+ Порядок</button>
+      <button class="tab" data-type="lie">+ Ложь</button>
     </div>
     <div class="questions-list" id="questionsList"></div>
   </div>
 
   <div class="section">
     <h3>6. Тест</h3>
-    <button class="btn primary" id="testBtn">▶ Запустить тест</button>
-    <button class="btn" id="resetPreviewBtn">↺ Сбросить</button>
+    <div class="row">
+        <button class="btn primary" id="testBtn" style="flex:1">▶ Запустить тест</button>
+        <button class="btn" id="resetPreviewBtn" style="flex:1">↺ Сбросить</button>
+    </div>
   </div>
   <div class="footer-credit">Автор редактора: <b>Гальмиз Мария Александровна</b></div>
 </section>
@@ -126,24 +149,40 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
 const LANGS = {
   ru: { name: "Русский", start: "ИГРАТЬ", lie: "ЛОЖЬ!", accuse: "ОПРОВЕРГНУТЬ", next: "ДАЛЬШЕ", check: "ПРОВЕРИТЬ", time: "ВРЕМЯ", lives: "ЖИЗНИ", truth: "ПРАВДА", false: "ЛОЖЬ", correct: "Верно!", wrong: "Неверно!", over: "Игра окончена", win: "Победа!", rebuttal: "Выберите опровержение:", restart: "Переиграть", statement: "Утверждение", question: "Вопрос", answer: "Ответ", oral: "Произнесите ответ вслух", submit: "Ответить", polyHead: "ПОЛИГРАФ", zoneNormal: "НОРМА", zoneStress: "СТРЕСС", orderHint: "Нажимайте по порядку" },
   en: { name: "English", start: "PLAY", lie: "LIE!", accuse: "REFUTE", next: "NEXT", check: "CHECK", time: "TIME", lives: "LIVES", truth: "TRUE", false: "FALSE", correct: "Correct!", wrong: "Wrong!", over: "Game Over", win: "You Win!", rebuttal: "Choose refutation:", restart: "Replay", statement: "Statement", question: "Question", answer: "Answer", oral: "Speak aloud", submit: "Submit", polyHead: "POLYGRAPH", zoneNormal: "NORMAL", zoneStress: "STRESS", orderHint: "Click in order" },
-  ko: { name: "한국어", start: "시작", lie: "거짓!", accuse: "반박", next: "다음", check: "확인", time: "시간", lives: "생명", truth: "참", false: "거짓", correct: "정답!", wrong: "오답!", over: "종료", win: "승리!", rebuttal: "반박 선택:", restart: "재시작", statement: "진술", question: "질문", answer: "답", oral: "말하기", submit: "제출", polyHead: "폴리그래프", zoneNormal: "정상", zoneStress: "스트레스", orderHint: "순서대로 클릭" }
+  ko: { name: "한국어", start: "시작", lie: "거짓!", accuse: "반박", next: "다음", check: "확인", time: "시간", lives: "생명", truth: "참", false: "거짓", correct: "정답!", wrong: "오답!", over: "종료", win: "승리!", rebuttal: "반박 선택:", restart: "재시작", statement: "진술", question: "질문", answer: "답", oral: "말하기", submit: "제출", polyHead: "폴리그래프", zoneNormal: "정상", zoneStress: "스트레스", orderHint: "순서대로 클릭" },
+  kk: { name: "Қазақша", start: "БАСТАУ", lie: "ӨТІРІК!", accuse: "ТЕРІСТЕУ", next: "КЕЛЕСІ", check: "ТЕКСЕРУ", time: "УАҚЫТ", lives: "ӨМІР", truth: "ШЫНДЫҚ", false: "ӨТІРІК", correct: "Дұрыс!", wrong: "Қате!", over: "Ойын аяқталды", win: "Жеңіс!", rebuttal: "Дұрыс терістеуді таңдаңыз:", restart: "Қайта ойнау", titleStart: "Сұрақ алуды бастау", statement: "Мәлімдеме", question: "Сұрақ", answer: "Жауап", oral: "Дауыстап айту", submit: "Жауап беру", polyHead: "ПОЛИГРАФ / ЖҮРЕК СОҒЫСЫ", zoneNormal: "ҚАЛЫПТЫ", zoneStress: "КҮЙЗЕЛІС", orderHint: "Дұрыс ретпен басыңыз" },
+  de: { name: "Deutsch", start: "START", lie: "LÜGE!", accuse: "WIDERLEGEN", next: "WEITER", check: "PRÜFEN", time: "ZEIT", lives: "LEBEN", truth: "WAHR", false: "FALSCH", correct: "Richtig!", wrong: "Falsch!", over: "Spiel vorbei", win: "Gewonnen!", rebuttal: "Wähle Widerlegung:", restart: "Nochmal", titleStart: "Verhör starten", statement: "Aussage", question: "Frage", answer: "Antwort", oral: "Laut sagen", submit: "Antworten", polyHead: "POLYGRAPH / HERZ", zoneNormal: "NORMAL", zoneStress: "STRESS", orderHint: "In richtiger Reihenfolge klicken" },
+  fr: { name: "Français", start: "DÉMARRER", lie: "MENSONGE !", accuse: "RÉFUTER", next: "SUIVANT", check: "VÉRIFIER", time: "TEMPS", lives: "VIES", truth: "VRAI", false: "FAUX", correct: "Correct !", wrong: "Incorrect !", over: "Fin du jeu", win: "Bravo !", rebuttal: "Choisissez la réfutation :", restart: "Rejouer", titleStart: "Commencer", statement: "Affirmation", question: "Question", answer: "Réponse", oral: "Dire à voix haute", submit: "Répondre", polyHead: "POLYGRAPHE / RYTHME", zoneNormal: "NORMAL", zoneStress: "STRESS", orderHint: "Cliquez dans le bon ordre" },
+  es: { name: "Español", start: "INICIAR", lie: "¡MENTIRA!", accuse: "REFUTAR", next: "SIGUIENTE", check: "COMPROBAR", time: "TIEMPO", lives: "VIDAS", truth: "VERDAD", false: "FALSO", correct: "¡Correcto!", wrong: "¡Incorrecto!", over: "Fin del juego", win: "¡Ganaste!", rebuttal: "Elige la refutación:", restart: "Jugar de nuevo", titleStart: "Iniciar", statement: "Afirmación", question: "Pregunta", answer: "Respuesta", oral: "Di tu respuesta", submit: "Responder", polyHead: "POLÍGRAFO / RITMO", zoneNormal: "NORMAL", zoneStress: "ESTRÉS", orderHint: "Haz clic en orden correcto" }
 };
-const FONTS = { Inter: "Inter,Arial,sans-serif", Orbitron: "Orbitron,sans-serif", Montserrat: "Montserrat,sans-serif", Georgia: "Georgia,serif" };
+
+const FONTS = { 
+    Inter: "Inter, sans-serif", 
+    Orbitron: "Orbitron, sans-serif", 
+    Montserrat: "Montserrat, sans-serif", 
+    "Space Grotesk": "'Space Grotesk', sans-serif", 
+    Georgia: "Georgia, serif", 
+    Verdana: "Verdana, sans-serif", 
+    "Courier New": "'Courier New', monospace",
+    Roboto: "Roboto, sans-serif",
+    Arial: "Arial, sans-serif",
+    "Times New Roman": "'Times New Roman', serif"
+};
 
 const defaults = {
-  title: "Детектор лжи", subtitle: "Раскрой правду", lang: "ru", font: "Inter", titlePage: true, titleColor: "#d95cff",
-  startBtnText: "Играть", replayBtnText: "Переиграть",
+  title: "Детектор лжи", subtitle: "Раскрой правду", lang: "ru", font: "Inter", titlePage: true, 
+  texts: { start: "Играть", replay: "Переиграть" },
+  sizes: { title: 54, question: 30, answer: 17, radius: 18 },
   suspect: { name: "", role: "" }, bg: "", suspectImg: "",
   anim: { idle: "breathe", correct: "jump", wrong: "shake" },
   winScreen: { title: "Победа!", text: "Вы раскрыли дело!", img: "" },
   loseScreen: { title: "Поражение", text: "Преступник ушел.", img: "" },
-  theme: { question: "#ffffff", answer: "#d8d9ff", button: "#9a43ff", gameBg: "#050713", panel: "#0d1126" },
+  theme: { titleColor: "#d95cff", question: "#ffffff", answer: "#d8d9ff", button: "#9a43ff", gameBg: "#050713", panel: "#0d1126" },
   settings: { lives: 3, timer: 0, interval: 1.5, polygraph: true, randomize: false },
-  task: { questionSize: 30, answerSize: 17, radius: 18, card: "#0d122b", option: "#151b3b" },
   questions: [
     { id: 1, type: "single", text: "Чему равен $\\sqrt{144}$?", options: ["10", "11", "12", "14"], correct: [2], explanation: "$12^2=144$" },
     { id: 2, type: "multi", text: "Простые числа:", options: ["2", "4", "7", "9"], correct: [0, 2], explanation: "" },
-    { id: 3, type: "text", text: "$2x+5=15$, $x=$?", options: [], correct: ["5"], explanation: "" },
+    { id: 3, type: "text", text: "Решите: $2x+5=15$, $x=$?", options: [], correct: ["5"], explanation: "" },
     { id: 4, type: "oral", text: "Объясните гравитацию", options: [], correct: [""], explanation: "" },
     { id: 5, type: "order", text: "Этапы решения", options: ["Чтение", "План", "Решение", "Проверка"], correct: [0,1,2,3], explanation: "" }
   ]
@@ -151,6 +190,7 @@ const defaults = {
 
 let state = structuredClone(defaults);
 const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
 const getPath = (o, p) => p.split(".").reduce((a, k) => a?.[k], o);
 const setPath = (o, p, v) => { const ps = p.split("."); let x = o; for (let i = 0; i < ps.length - 1; i++) x = x[ps[i]]; x[ps[ps.length - 1]] = v };
 const escapeHTML = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
@@ -165,7 +205,6 @@ function compressImage(file, callback) {
         img.onload = function() {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            // Максимальный размер 800px по большей стороне для экономии места
             const MAX_SIZE = 800;
             let width = img.width;
             let height = img.height;
@@ -177,10 +216,20 @@ function compressImage(file, callback) {
             canvas.width = width;
             canvas.height = height;
             ctx.drawImage(img, 0, 0, width, height);
-            // Качество 0.7 для баланса
             callback(canvas.toDataURL('image/jpeg', 0.7));
         }
     }
+}
+
+function renderMathPreview(text) {
+    try {
+        // Простая замена для превью в редакторе
+        return text.replace(/\$([^$]+)\$/g, (match, formula) => {
+            try {
+                return katex.renderToString(formula, { throwOnError: false });
+            } catch (e) { return match; }
+        });
+    } catch(e) { return text; }
 }
 
 function initControls() {
@@ -194,7 +243,6 @@ function initControls() {
     el.addEventListener("input", sync); el.addEventListener("change", sync);
   });
 
-  // Загрузки с сжатием
   const handleUpload = (id, path) => {
       $(id).onchange = e => { const f = e.target.files[0]; if(f) compressImage(f, res => { setPath(state, path, res); renderAll(); }) };
   };
@@ -208,12 +256,15 @@ function initControls() {
   $("#clearWinImg").onclick = () => { state.winScreen.img = ""; renderAll() };
   $("#clearLoseImg").onclick = () => { state.loseScreen.img = ""; renderAll() };
   
-  $("#addSingle").onclick = () => addQ("single"); $("#addMulti").onclick = () => addQ("multi");
-  $("#addText").onclick = () => addQ("text"); $("#addOral").onclick = () => addQ("oral");
-  $("#addOrder").onclick = () => addQ("order"); $("#addLie").onclick = () => addQ("lie");
+  // Исправление кнопок добавления вопросов
+  $$("#qTabs .tab").forEach(btn => {
+      btn.onclick = () => addQ(btn.dataset.type);
+  });
   
-  $("#saveBtn").onclick = saveProject; $("#loadBtn").onclick = () => $("#loadInput").click();
-  $("#loadInput").onchange = loadProject; $("#downloadBtn").onclick = downloadHTML;
+  $("#saveBtn").onclick = saveProject; 
+  $("#loadBtn").onclick = () => $("#loadInput").click();
+  $("#loadInput").onchange = loadProject; 
+  $("#downloadBtn").onclick = downloadHTML;
   $("#copyBtn").onclick = copyGenially;
   $("#newBtn").onclick = () => { if(confirm("Новый проект?")) { state = structuredClone(defaults); renderAll() } };
   $("#testBtn").onclick = () => postPreview({ cmd: "start" });
@@ -230,7 +281,7 @@ function renderQuestions() {
   $("#questionsList").innerHTML = state.questions.map((q, i) => `
     <div class="question-card" data-q="${q.id}">
       <div class="q-head"><b>${i + 1}. ${names[q.type]}</b><button class="mini delq">Удалить</button></div>
-      <div class="field"><label>Текст ($x^2$)</label><textarea class="qtext">${escapeHTML(q.text)}</textarea></div>
+      <div class="field"><label>Текст (LaTeX: $...$)</label><textarea class="qtext">${escapeHTML(q.text)}</textarea></div>
       ${q.type === "lie" ? `<div class="field switch"><input class="qtruth" type="checkbox" ${q.truth ? "checked" : ""}><label>Это ПРАВДА</label></div>` : ""}
       ${["single", "multi", "order"].includes(q.type) ? `<div class="field"><label>Варианты</label><textarea class="qopts">${escapeHTML(q.options.join("\n"))}</textarea></div><div class="field"><label>Номера верных (через запятую)</label><input class="qcorrect" value="${q.correct.map(x => x + 1).join(",")}"></div>` : ""}
       ${q.type === "text" ? `<div class="field"><label>Ответы (через |)</label><input class="qcorrect" value="${escapeHTML(q.correct.join(" | "))}"></div>` : ""}
@@ -271,17 +322,20 @@ function buildGameHTML() {
   const langsJSON = JSON.stringify(LANGS).replace(/<\/script>/g, "<\\/script>");
   
   return `<!doctype html><html lang="${state.lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.title)}</title>
+<!-- KaTeX for Math -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:${FONTS[state.font]||FONTS.Inter};background:${state.theme.gameBg};color:#fff;min-height:100vh;overflow-x:hidden}
 .app{min-height:100vh;background:${state.bg?`linear-gradient(#03040b99,#03040bcc),url("${state.bg}") center/cover no-repeat`:`radial-gradient(circle at 70% 10%,#28105a 0,#070817 45%,#03040b 100%)`};padding:24px;display:flex;flex-direction:column}
 .wrap{max-width:1250px;margin:auto;width:100%;flex:1;display:flex;flex-direction:column}
 .top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px;flex-wrap:wrap}
-.title{font-size:clamp(28px,4vw,54px);font-weight:900;color:${state.titleColor};text-shadow:0 0 28px ${state.titleColor}66;line-height:1.1}
+.title{font-size:${state.sizes.title}px;font-weight:900;color:${state.theme.titleColor};text-shadow:0 0 28px ${state.theme.titleColor}66;line-height:1.1}
 .sub{color:#b5b7d5;margin-top:4px;font-size:clamp(14px,2vw,20px)}
 .hud{display:flex;gap:9px;flex-wrap:wrap}
 .badge{background:#0c1026dd;border:1px solid #292f58;border-radius:12px;padding:9px 13px;font-weight:700;font-size:14px}
 .game{display:grid;grid-template-columns:minmax(280px,38%) 1fr;gap:18px;align-items:stretch;flex:1}
-.suspect,.task,.poly{background:${state.theme.panel}e8;border:1px solid #2a3060;border-radius:${state.task.radius}px;box-shadow:0 18px 60px #0007;display:flex;flex-direction:column}
+.suspect,.task,.poly{background:${state.theme.panel}e8;border:1px solid #2a3060;border-radius:${state.sizes.radius}px;box-shadow:0 18px 60px #0007;display:flex;flex-direction:column}
 .suspect{padding:18px;min-height:400px;justify-content:center;align-items:center}
 .suspect img{width:100%;max-height:450px;object-fit:contain;border-radius:14px;background:transparent}
 .poly{margin-top:18px;padding:12px;min-height:160px}
@@ -299,9 +353,9 @@ function buildGameHTML() {
 .chart svg.anim-fast{animation:scrollWave 0.6s linear infinite}
 .task{padding:24px;min-height:400px;justify-content:center}
 .label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8e95bf;margin-bottom:10px}
-.question{font-size:${state.task.questionSize}px;line-height:1.18;color:${state.theme.question};font-weight:800;margin-bottom:20px}
+.question{font-size:${state.sizes.question}px;line-height:1.18;color:${state.theme.question};font-weight:800;margin-bottom:20px}
 .options{display:grid;gap:10px}
-.option{width:100%;text-align:left;border:1px solid #313864;background:${state.task.option};color:${state.theme.answer};border-radius:${state.task.radius}px;padding:14px;font-size:${state.task.answerSize}px;cursor:pointer;transition:all .2s}
+.option{width:100%;text-align:left;border:1px solid #313864;background:${state.theme.panel};color:${state.theme.answer};border-radius:${state.sizes.radius}px;padding:14px;font-size:${state.sizes.answer}px;cursor:pointer;transition:all .2s}
 .option:hover{border-color:${state.theme.button};box-shadow:0 0 20px ${state.theme.button}22}
 .option.selected{border-color:${state.theme.button};background:${state.theme.button}33}
 .option.correct{border-color:#31e6a2!important;background:#31e6a222!important}
@@ -312,17 +366,13 @@ function buildGameHTML() {
 .notice{margin-top:12px;color:#c4c7e2;line-height:1.5;min-height:24px}
 .start{flex:1;display:grid;place-items:center;min-height:60vh}
 .startcard{max-width:700px;text-align:center;background:#0d1126e8;border:1px solid #343a70;padding:40px;border-radius:26px;box-shadow:0 25px 100px #0009}
-.startcard h1{font-size:clamp(32px,6vw,68px);color:${state.titleColor};margin:0 0 10px}
+.startcard h1{font-size:${state.sizes.title}px;color:${state.theme.titleColor};margin:0 0 10px}
 .timerbar{height:5px;background:#202643;border-radius:5px;overflow:hidden;margin:10px 0}
 .timerfill{height:100%;width:100%;background:${state.theme.button};transform-origin:left;transition:width 1s linear}
 .end{text-align:center;padding:70px 20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.end h2{font-size:48px;color:${state.titleColor};margin-bottom:20px}
+.end h2{font-size:48px;color:${state.theme.titleColor};margin-bottom:20px}
 .end p{font-size:18px;color:#b5b7d5;margin-bottom:30px;max-width:600px}
 .end img{max-width:300px;max-height:300px;border-radius:20px;margin-bottom:30px;object-fit:contain}
-.frac{display:inline-flex;vertical-align:middle;flex-direction:column;text-align:center;margin:0 4px;font-size:0.8em}
-.frac span:first-child{border-bottom:1px solid currentColor;padding:0 3px}
-.frac span:last-child{padding:0 3px}
-.radicand{border-top:1px solid currentColor;padding:0 2px}
 .liebtn{background:#ff3b6e!important;box-shadow:0 10px 35px #ff3b6e55!important}
 .accuse{background:#22294a!important;border:1px solid #40476e}
 
@@ -330,21 +380,43 @@ function buildGameHTML() {
 .suspect img { transition: all 0.3s ease; }
 @keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }
+@keyframes sway { 0%,100%{transform:rotate(0)} 50%{transform:rotate(2deg)} }
+@keyframes glitch { 0%{transform:translate(0)} 20%{transform:translate(-2px,2px)} 40%{transform:translate(-2px,-2px)} 60%{transform:translate(2px,2px)} 80%{transform:translate(2px,-2px)} 100%{transform:translate(0)} }
+@keyframes shadow { 0%,100%{filter:drop-shadow(0 0 0 transparent)} 50%{filter:drop-shadow(0 0 10px rgba(255,255,255,0.3))} }
 @keyframes jump { 0%{transform:translateY(0)} 50%{transform:translateY(-30px)} 100%{transform:translateY(0)} }
 @keyframes glow { 0%{filter:drop-shadow(0 0 0 transparent)} 50%{filter:drop-shadow(0 0 20px #31e6a2)} 100%{filter:drop-shadow(0 0 0 transparent)} }
 @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+@keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+@keyframes flash { 0%,100%{opacity:1} 50%{opacity:0.5} }
+@keyframes grow { 0%{transform:scale(1)} 100%{transform:scale(1.1)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
 @keyframes fade { 0%{opacity:1} 50%{opacity:0.3} 100%{opacity:1} }
 @keyframes tilt { 0%{transform:rotate(0)} 25%{transform:rotate(-10deg)} 75%{transform:rotate(10deg)} 100%{transform:rotate(0)} }
+@keyframes shrink { 0%{transform:scale(1)} 100%{transform:scale(0.9)} }
+@keyframes blur { 0%{filter:blur(0)} 50%{filter:blur(3px)} 100%{filter:blur(0)} }
+@keyframes invert { 0%{filter:invert(0)} 50%{filter:invert(1)} 100%{filter:invert(0)} }
+@keyframes fall { 0%{transform:translateY(0)} 100%{transform:translateY(20px);opacity:0.5} }
 
 .anim-breathe { animation: breathe 3s infinite ease-in-out; }
 .anim-float { animation: float 4s infinite ease-in-out; }
-.anim-shake { animation: shake 0.5s infinite; }
+.anim-pulse { animation: pulse 2s infinite; }
+.anim-sway { animation: sway 3s infinite ease-in-out; }
+.anim-glitch { animation: glitch 0.5s infinite; }
+.anim-shadow { animation: shadow 3s infinite; }
 .anim-jump { animation: jump 0.6s ease; }
 .anim-glow { animation: glow 1s ease; }
 .anim-spin { animation: spin 0.8s ease; }
+.anim-bounce { animation: bounce 0.5s ease; }
+.anim-flash { animation: flash 0.3s ease; }
+.anim-grow { animation: grow 0.5s forwards; }
+.anim-shake { animation: shake 0.5s infinite; }
 .anim-fade { animation: fade 0.8s ease; }
 .anim-tilt { animation: tilt 0.6s ease; }
+.anim-shrink { animation: shrink 0.5s forwards; }
+.anim-blur { animation: blur 0.8s ease; }
+.anim-invert { animation: invert 0.5s ease; }
+.anim-fall { animation: fall 0.8s forwards; }
 
 @media(max-width:900px){.game{grid-template-columns:1fr}.suspect{min-height:300px}.task{min-height:auto}}
 </style></head><body>
@@ -382,18 +454,12 @@ function playSound(type) {
 }
 
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+
 function renderMath(s){
-  s=esc(s);
-  s=s.replace(/\\$([^$]+)\\$/g,(m,f)=>{
-    let r=f;
-    r=r.replace(/\\\\frac\\{([^{}]+)\\}\\{([^{}]+)\\}/g,'<span class="frac"><span>$1</span><span>$2</span></span>');
-    r=r.replace(/\\^([A-Za-z0-9]+)/g,'<sup>$1</sup>');
-    r=r.replace(/_([A-Za-z0-9]+)/g,'<sub>$1</sub>');
-    r=r.replace(/\\\\sqrt\\{([^}]+)\\}/g,'√<span class="radicand">$1</span>');
-    r=r.replace(/\\\\sqrt\\(([^)]+)\\)/g,'√<span class="radicand">$1</span>');
-    return r;
+  if(!window.katex) return esc(s);
+  return s.replace(/\\$([^$]+)\\$/g, (match, formula) => {
+      try { return katex.renderToString(formula, { throwOnError: false }); } catch(e) { return match; }
   });
-  return s;
 }
 
 function setSuspectAnim(type) {
@@ -407,7 +473,7 @@ function setSuspectAnim(type) {
 
 function start(){i=-1;lives=CFG.settings.lives;time=CFG.settings.timer;correctCount=0;selected=[];next();document.querySelector(".start")?.remove()}
 function renderStart(){
-  const txt=CFG.startBtnText||T.start;
+  const txt=CFG.texts.start||T.start;
   document.querySelector("#root").innerHTML=CFG.titlePage?'<div class="start"><div class="startcard"><h1>'+esc(CFG.title)+'</h1><p class="sub">'+esc(CFG.subtitle)+'</p><button class="mainbtn" style="margin-top:25px" onclick="start()">'+esc(txt)+'</button></div></div>':'<div></div>';
   if(!CFG.titlePage)start();
 }
@@ -436,7 +502,7 @@ function setupAnswer(q){
   const area=document.querySelector("#answerArea"),actions=document.querySelector("#actions"),notice=document.querySelector("#notice");
   if(q.type==="lie"){area.innerHTML='<div style="color:#b5b7d5">'+(q.truth?T.truth:T.false)+'</div>';actions.innerHTML='<button class="mainbtn liebtn" onclick="judgeLie()">'+T.lie+'</button><button class="mainbtn secondary" onclick="judgeTruth()">'+T.truth+'</button>';return}
   if(q.type==="oral"){area.innerHTML='<div style="color:#b5b7d5">'+T.oral+'</div>';actions.innerHTML='<button class="mainbtn" onclick="oralAnswer()">'+T.submit+'</button>';return}
-  if(q.type==="text"){area.innerHTML='<input id="textAnswer" style="font-size:'+CFG.task.answerSize+'px;width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;outline:none" placeholder="'+esc(T.answer)+'">';actions.innerHTML='<button class="mainbtn" onclick="checkText()">'+T.check+'</button>';return}
+  if(q.type==="text"){area.innerHTML='<input id="textAnswer" style="font-size:'+CFG.sizes.answer+'px;width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;outline:none" placeholder="'+esc(T.answer)+'">';actions.innerHTML='<button class="mainbtn" onclick="checkText()">'+T.check+'</button>';return}
   if(q.type==="order"){notice.textContent=T.orderHint;area.innerHTML='<div class="options">'+q.options.map((x,j)=>'<button class="option" data-j="'+j+'" onclick="pickOrder('+j+')"><span class="ord-num" style="display:inline-block;width:20px;font-weight:bold;color:#666"></span>'+renderMath(x)+'</button>').join('')+'</div>';actions.innerHTML='<button class="mainbtn" onclick="checkChoice()">'+T.check+'</button>';return}
   area.innerHTML='<div class="options">'+q.options.map((x,j)=>'<button class="option" data-j="'+j+'" onclick="pick('+j+')">'+renderMath(x)+'</button>').join('')+'</div>';
   actions.innerHTML='<button class="mainbtn" onclick="checkChoice()">'+T.check+'</button>';
@@ -455,7 +521,7 @@ function judgeTruth(){const q=qs[i];if(q.truth){poly(false);good()}else{poly(tru
 function showRebuttal(){const q=qs[i],a=document.querySelector("#answerArea");a.innerHTML='<div class="label">'+T.rebuttal+'</div><div class="options">'+q.rebuttals.map((x,j)=>'<button class="option" onclick="rebut('+j+')">'+esc(x)+'</button>').join('')+'</div>';document.querySelector("#actions").innerHTML=""}
 function rebut(j){const q=qs[i];if(j===q.correctRebuttal){document.querySelector("#notice").textContent=T.correct+" "+(q.explanation||"");correctCount++;poly(false);playSound('good');setSuspectAnim('correct');setTimeout(next,Math.max(0,CFG.settings.interval*1000))}else{document.querySelector("#notice").textContent=T.wrong;wrong(false)}}
 function end(win){
-  const txt=CFG.replayBtnText||T.restart;
+  const txt=CFG.texts.replay||T.restart;
   const scr=win?CFG.winScreen:CFG.loseScreen;
   const t=scr.title||(win?T.win:T.over);
   const msg=scr.text||"";
@@ -479,18 +545,19 @@ async function copyGenially() {
   const html = buildGameHTML();
   
   try {
-    // Создаем Blob для надежной передачи большого объема данных без ограничений строки
     const blob = new Blob([html], {type: 'text/html'});
-    const url = URL.createObjectURL(blob);
-    
-    // Формируем iframe, указывающий на blob (работает локально) или base64 (для переноса)
-    // Для Genially лучше всего подходит base64, но он длинный. 
-    // Если код слишком большой, Genially может его обрезать. 
-    // Мы используем максимально сжатый base64.
     const reader = new FileReader();
     reader.readAsDataURL(blob);
     reader.onloadend = async function() {
         const base64data = reader.result;
+        // Проверяем длину. Если > 2MB, Genially может не принять.
+        if (base64data.length > 2000000) {
+            btn.innerText = "⚠ Слишком много картинок! Скачайте HTML.";
+            btn.style.background = "#ff4d78";
+            setTimeout(() => { btn.innerText = originalText; btn.style.background = ""; }, 4000);
+            return;
+        }
+        
         const iframeCode = `<iframe style="width:100%;height:800px;border:none;border-radius:18px" src="${base64data}"></iframe>`;
         
         try {
