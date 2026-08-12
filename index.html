@@ -149,7 +149,7 @@ input,textarea,select{width:100%;background:#080b1d;color:#f5f3ff;border:1px sol
 const LANGS = {
   ru: { name: "Русский", start: "ИГРАТЬ", lie: "ЛОЖЬ!", accuse: "ОПРОВЕРГНУТЬ", next: "ДАЛЬШЕ", check: "ПРОВЕРИТЬ", time: "ВРЕМЯ", lives: "ЖИЗНИ", truth: "ПРАВДА", false: "ЛОЖЬ", correct: "Верно!", wrong: "Неверно!", over: "Игра окончена", win: "Победа!", rebuttal: "Выберите опровержение:", restart: "Переиграть", statement: "Утверждение", question: "Вопрос", answer: "Ответ", oral: "Произнесите ответ вслух", submit: "Ответить", polyHead: "ПОЛИГРАФ", zoneNormal: "НОРМА", zoneStress: "СТРЕСС", orderHint: "Нажимайте по порядку" },
   en: { name: "English", start: "PLAY", lie: "LIE!", accuse: "REFUTE", next: "NEXT", check: "CHECK", time: "TIME", lives: "LIVES", truth: "TRUE", false: "FALSE", correct: "Correct!", wrong: "Wrong!", over: "Game Over", win: "You Win!", rebuttal: "Choose refutation:", restart: "Replay", statement: "Statement", question: "Question", answer: "Answer", oral: "Speak aloud", submit: "Submit", polyHead: "POLYGRAPH", zoneNormal: "NORMAL", zoneStress: "STRESS", orderHint: "Click in order" },
-  ko: { name: "한국어", start: "시작", lie: "거짓!", accuse: "반박", next: "다음", check: "확인", time: "시간", lives: "생명", truth: "참", false: "거짓", correct: "정답!", wrong: "오답!", over: "종료", win: "승리!", rebuttal: "반박 선택:", restart: "재시작", statement: "진술", question: "질문", answer: "답", oral: "말하기", submit: "제출", polyHead: "폴리그래프", zoneNormal: "정상", zoneStress: "스트레스", orderHint: "순서대로 클릭" },
+  ko: { name: "한국어", start: "시작", lie: "거짓!", accuse: "반박", next: "다음", check: "확인", time: "시간", lives: "생명", truth: "참", false: "거짓", correct: "정답!", wrong: "오답!", over: "종료", win: "승리!", rebuttal: "반박 선택:", restart: "재시작", statement: "진술", question: "질문", answer: "답", oral: "말하기", submit: "제출", polyHead: "폴리그래ф", zoneNormal: "정상", zoneStress: "스트레스", orderHint: "순서대로 클릭" },
   kk: { name: "Қазақша", start: "БАСТАУ", lie: "ӨТІРІК!", accuse: "ТЕРІСТЕУ", next: "КЕЛЕСІ", check: "ТЕКСЕРУ", time: "УАҚЫТ", lives: "ӨМІР", truth: "ШЫНДЫҚ", false: "ӨТІРІК", correct: "Дұрыс!", wrong: "Қате!", over: "Ойын аяқталды", win: "Жеңіс!", rebuttal: "Дұрыс терістеуді таңдаңыз:", restart: "Қайта ойнау", titleStart: "Сұрақ алуды бастау", statement: "Мәлімдеме", question: "Сұрақ", answer: "Жауап", oral: "Дауыстап айту", submit: "Жауап беру", polyHead: "ПОЛИГРАФ / ЖҮРЕК СОҒЫСЫ", zoneNormal: "ҚАЛЫПТЫ", zoneStress: "КҮЙЗЕЛІС", orderHint: "Дұрыс ретпен басыңыз" },
   de: { name: "Deutsch", start: "START", lie: "LÜGE!", accuse: "WIDERLEGEN", next: "WEITER", check: "PRÜFEN", time: "ZEIT", lives: "LEBEN", truth: "WAHR", false: "FALSCH", correct: "Richtig!", wrong: "Falsch!", over: "Spiel vorbei", win: "Gewonnen!", rebuttal: "Wähle Widerlegung:", restart: "Nochmal", titleStart: "Verhör starten", statement: "Aussage", question: "Frage", answer: "Antwort", oral: "Laut sagen", submit: "Antworten", polyHead: "POLYGRAPH / HERZ", zoneNormal: "NORMAL", zoneStress: "STRESS", orderHint: "In richtiger Reihenfolge klicken" },
   fr: { name: "Français", start: "DÉMARRER", lie: "MENSONGE !", accuse: "RÉFUTER", next: "SUIVANT", check: "VÉRIFIER", time: "TEMPS", lives: "VIES", truth: "VRAI", false: "FAUX", correct: "Correct !", wrong: "Incorrect !", over: "Fin du jeu", win: "Bravo !", rebuttal: "Choisissez la réfutation :", restart: "Rejouer", titleStart: "Commencer", statement: "Affirmation", question: "Question", answer: "Réponse", oral: "Dire à voix haute", submit: "Répondre", polyHead: "POLYGRAPHE / RYTHME", zoneNormal: "NORMAL", zoneStress: "STRESS", orderHint: "Cliquez dans le bon ordre" },
@@ -321,21 +321,21 @@ function buildGameHTML() {
   const cfg = JSON.stringify(state).replace(/<\/script>/g, "<\\/script>");
   const langsJSON = JSON.stringify(LANGS).replace(/<\/script>/g, "<\\/script>");
   
-  return `<!doctype html><html lang="${state.lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.title)}</title>
+  return `<!doctype html><html lang="\${state.lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>\${escapeHTML(state.title)}</title>
 <!-- KaTeX for Math -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:${FONTS[state.font]||FONTS.Inter};background:${state.theme.gameBg};color:#fff;min-height:100vh;overflow-x:hidden}
-.app{min-height:100vh;background:${state.bg?`linear-gradient(#03040b99,#03040bcc),url("${state.bg}") center/cover no-repeat`:`radial-gradient(circle at 70% 10%,#28105a 0,#070817 45%,#03040b 100%)`};padding:24px;display:flex;flex-direction:column}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:\${FONTS[state.font]||FONTS.Inter};background:\${state.theme.gameBg};color:#fff;min-height:100vh;overflow-x:hidden}
+.app{min-height:100vh;background:\${state.bg?\`linear-gradient(#03040b99,#03040bcc),url("\${state.bg}") center/cover no-repeat\`:\`radial-gradient(circle at 70% 10%,#28105a 0,#070817 45%,#03040b 100%)\`};padding:24px;display:flex;flex-direction:column}
 .wrap{max-width:1250px;margin:auto;width:100%;flex:1;display:flex;flex-direction:column}
 .top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px;flex-wrap:wrap}
-.title{font-size:${state.sizes.title}px;font-weight:900;color:${state.theme.titleColor};text-shadow:0 0 28px ${state.theme.titleColor}66;line-height:1.1}
+.title{font-size:\${state.sizes.title}px;font-weight:900;color:\${state.theme.titleColor};text-shadow:0 0 28px \${state.theme.titleColor}66;line-height:1.1}
 .sub{color:#b5b7d5;margin-top:4px;font-size:clamp(14px,2vw,20px)}
 .hud{display:flex;gap:9px;flex-wrap:wrap}
 .badge{background:#0c1026dd;border:1px solid #292f58;border-radius:12px;padding:9px 13px;font-weight:700;font-size:14px}
 .game{display:grid;grid-template-columns:minmax(280px,38%) 1fr;gap:18px;align-items:stretch;flex:1}
-.suspect,.task,.poly{background:${state.theme.panel}e8;border:1px solid #2a3060;border-radius:${state.sizes.radius}px;box-shadow:0 18px 60px #0007;display:flex;flex-direction:column}
+.suspect,.task,.poly{background:\${state.theme.panel}e8;border:1px solid #2a3060;border-radius:\${state.sizes.radius}px;box-shadow:0 18px 60px #0007;display:flex;flex-direction:column}
 .suspect{padding:18px;min-height:400px;justify-content:center;align-items:center}
 .suspect img{width:100%;max-height:450px;object-fit:contain;border-radius:14px;background:transparent}
 .poly{margin-top:18px;padding:12px;min-height:160px}
@@ -353,24 +353,24 @@ function buildGameHTML() {
 .chart svg.anim-fast{animation:scrollWave 0.6s linear infinite}
 .task{padding:24px;min-height:400px;justify-content:center}
 .label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8e95bf;margin-bottom:10px}
-.question{font-size:${state.sizes.question}px;line-height:1.18;color:${state.theme.question};font-weight:800;margin-bottom:20px}
+.question{font-size:\${state.sizes.question}px;line-height:1.18;color:\${state.theme.question};font-weight:800;margin-bottom:20px}
 .options{display:grid;gap:10px}
-.option{width:100%;text-align:left;border:1px solid #313864;background:${state.theme.panel};color:${state.theme.answer};border-radius:${state.sizes.radius}px;padding:14px;font-size:${state.sizes.answer}px;cursor:pointer;transition:all .2s}
-.option:hover{border-color:${state.theme.button};box-shadow:0 0 20px ${state.theme.button}22}
-.option.selected{border-color:${state.theme.button};background:${state.theme.button}33}
+.option{width:100%;text-align:left;border:1px solid #313864;background:\${state.theme.panel};color:\${state.theme.answer};border-radius:\${state.sizes.radius}px;padding:14px;font-size:\${state.sizes.answer}px;cursor:pointer;transition:all .2s}
+.option:hover{border-color:\${state.theme.button};box-shadow:0 0 20px \${state.theme.button}22}
+.option.selected{border-color:\${state.theme.button};background:\${state.theme.button}33}
 .option.correct{border-color:#31e6a2!important;background:#31e6a222!important}
 .option.wrong{border-color:#ff4d78!important;background:#ff4d7822!important}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
-.mainbtn{border:0;border-radius:12px;padding:13px 18px;background:${state.theme.button};color:#fff;font-weight:900;box-shadow:0 10px 30px ${state.theme.button}44;cursor:pointer;font-size:16px}
+.mainbtn{border:0;border-radius:12px;padding:13px 18px;background:\${state.theme.button};color:#fff;font-weight:900;box-shadow:0 10px 30px \${state.theme.button}44;cursor:pointer;font-size:16px}
 .secondary{background:#141936;border:1px solid #33395e}
 .notice{margin-top:12px;color:#c4c7e2;line-height:1.5;min-height:24px}
 .start{flex:1;display:grid;place-items:center;min-height:60vh}
 .startcard{max-width:700px;text-align:center;background:#0d1126e8;border:1px solid #343a70;padding:40px;border-radius:26px;box-shadow:0 25px 100px #0009}
-.startcard h1{font-size:${state.sizes.title}px;color:${state.theme.titleColor};margin:0 0 10px}
+.startcard h1{font-size:\${state.sizes.title}px;color:\${state.theme.titleColor};margin:0 0 10px}
 .timerbar{height:5px;background:#202643;border-radius:5px;overflow:hidden;margin:10px 0}
-.timerfill{height:100%;width:100%;background:${state.theme.button};transform-origin:left;transition:width 1s linear}
+.timerfill{height:100%;width:100%;background:\${state.theme.button};transform-origin:left;transition:width 1s linear}
 .end{text-align:center;padding:70px 20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.end h2{font-size:48px;color:${state.theme.titleColor};margin-bottom:20px}
+.end h2{font-size:48px;color:\${state.theme.titleColor};margin-bottom:20px}
 .end p{font-size:18px;color:#b5b7d5;margin-bottom:30px;max-width:600px}
 .end img{max-width:300px;max-height:300px;border-radius:20px;margin-bottom:30px;object-fit:contain}
 .liebtn{background:#ff3b6e!important;box-shadow:0 10px 35px #ff3b6e55!important}
@@ -422,8 +422,8 @@ function buildGameHTML() {
 </style></head><body>
 <div class="app"><div class="wrap" id="root"></div></div>
 <script>
-const CFG=${cfg};
-const ALL_LANGS=${langsJSON};
+const CFG=\${cfg};
+const ALL_LANGS=\${langsJSON};
 const T=ALL_LANGS[CFG.lang]||ALL_LANGS.ru;
 let qs=CFG.questions.slice();
 if(CFG.settings.randomize)qs.sort(()=>Math.random()-.5);
@@ -457,7 +457,7 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 
 function renderMath(s){
   if(!window.katex) return esc(s);
-  return s.replace(/\\$([^$]+)\\$/g, (match, formula) => {
+  return s.replace(/\\\\$([^$]+)\\\\/g, (match, formula) => {
       try { return katex.renderToString(formula, { throwOnError: false }); } catch(e) { return match; }
   });
 }
@@ -495,7 +495,7 @@ function poly(lie){
 }
 function renderQuestion(){
   const q=qs[i],isLie=q.type==="lie";
-  document.querySelector("#root").innerHTML='<div class="top"><div><div class="title">'+esc(CFG.title)+'</div><div class="sub">'+esc(CFG.subtitle)+'</div></div><div class="hud"><span class="badge">'+T.lives+': '+'❤'.repeat(Math.max(0,lives))+'</span>'+(CFG.settings.timer>0?'<span class="badge">'+T.time+': <span id="timerText">'+time+'s</span></span>':'')+'</div></div><div class="game"><div><div class="suspect">'+(CFG.suspectImg?'<img src="'+CFG.suspectImg+'" onerror="this.style.display=\\'none\\'">':'')+'</div><div class="poly"><div class="polyhead"><span>'+T.polyHead+'</span><span id="zoneText">'+T.zoneNormal+'</span></div><div class="zone"><span class="needle"></span></div><div class="lights"><span class="light green"></span><span class="light red"></span></div><div class="chart"><svg viewBox="0 0 1000 100" preserveAspectRatio="none" class="anim-slow"><path id="wave" d="M0 50 L1000 50" fill="none" stroke="#7e8bff" stroke-width="3"/></svg></div></div></div><div class="task"><div class="label">'+(isLie?T.statement:T.question)+' · '+(i+1)+' / '+qs.length+'</div><div class="question">'+renderMath(q.text)+'</div><div id="answerArea"></div><div class="actions" id="actions"></div><div class="notice" id="notice"></div></div></div>'+(CFG.settings.timer>0?'<div class="timerbar"><div id="timerfill" class="timerfill"></div></div>':'');
+  document.querySelector("#root").innerHTML='<div class="top"><div><div class="title">'+esc(CFG.title)+'</div><div class="sub">'+esc(CFG.subtitle)+'</div></div><div class="hud"><span class="badge">'+T.lives+': '+'❤'.repeat(Math.max(0,lives))+'</span>'+(CFG.settings.timer>0?'<span class="badge">'+T.time+': <span id="timerText">'+time+'s</span></span>':'')+'</div></div><div class="game"><div><div class="suspect">'+(CFG.suspectImg?'<img src="'+CFG.suspectImg+'" onerror="this.style.display=\\\\'none\\\\'">':'')+'</div><div class="poly"><div class="polyhead"><span>'+T.polyHead+'</span><span id="zoneText">'+T.zoneNormal+'</span></div><div class="zone"><span class="needle"></span></div><div class="lights"><span class="light green"></span><span class="light red"></span></div><div class="chart"><svg viewBox="0 0 1000 100" preserveAspectRatio="none" class="anim-slow"><path id="wave" d="M0 50 L1000 50" fill="none" stroke="#7e8bff" stroke-width="3"/></svg></div></div></div><div class="task"><div class="label">'+(isLie?T.statement:T.question)+' · '+(i+1)+' / '+qs.length+'</div><div class="question">'+renderMath(q.text)+'</div><div id="answerArea"></div><div class="actions" id="actions"></div><div class="notice" id="notice"></div></div></div>'+(CFG.settings.timer>0?'<div class="timerbar"><div id="timerfill" class="timerfill"></div></div>':'');
   poly(isLie&&!q.truth);setupAnswer(q);
 }
 function setupAnswer(q){
@@ -526,7 +526,7 @@ function end(win){
   const t=scr.title||(win?T.win:T.over);
   const msg=scr.text||"";
   const im=scr.img||"";
-  document.querySelector("#root").innerHTML='<div class="end">'+(im?'<img src="'+im+'" onerror="this.style.display=\\'none\\'">':'')+'<h2>'+esc(t)+'</h2>'+(msg?'<p>'+esc(msg)+'</p>':'')+'<p style="color:#9ca2c9">'+correctCount+' / '+totalQuestions+' верно</p><button class="mainbtn" onclick="location.reload()">'+esc(txt)+'</button></div>';
+  document.querySelector("#root").innerHTML='<div class="end">'+(im?'<img src="'+im+'" onerror="this.style.display=\\\\'none\\\\'">':'')+'<h2>'+esc(t)+'</h2>'+(msg?'<p>'+esc(msg)+'</p>':'')+'<p style="color:#9ca2c9">'+correctCount+' / '+totalQuestions+' верно</p><button class="mainbtn" onclick="location.reload()">'+esc(txt)+'</button></div>';
 }
 window.addEventListener("message",e=>{if(e.data?.cmd==="start")start();if(e.data?.cmd==="reset")renderStart()});
 renderStart();
